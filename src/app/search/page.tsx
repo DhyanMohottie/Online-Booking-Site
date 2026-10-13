@@ -40,7 +40,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-6">
-      <SearchBar destination={sp.destination} checkIn={sp.checkIn} checkOut={sp.checkOut} guests={sp.guests} />
+      <div className="bleed -mt-8 bg-ink py-8">
+        <div className="mx-auto max-w-6xl px-4">
+          <h1 className="mb-4 text-2xl text-white">Find your stay</h1>
+          <SearchBar destination={sp.destination} checkIn={sp.checkIn} checkOut={sp.checkOut} guests={sp.guests} />
+        </div>
+      </div>
 
       {datesGiven && !stay && (
         <p role="alert" className="rounded-md bg-yellow-50 px-4 py-3 text-sm text-yellow-800">

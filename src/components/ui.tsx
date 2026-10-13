@@ -39,7 +39,7 @@ export function StatusBadge({ status }: { status: string }) {
 export function Price({ cents, suffix }: { cents: number; suffix?: string }) {
   return (
     <span>
-      <span className="text-lg font-bold">{formatPrice(cents)}</span>
+      <span className="font-heading text-xl font-semibold text-brand">{formatPrice(cents)}</span>
       {suffix && <span className="text-xs text-gray-500"> {suffix}</span>}
     </span>
   );
@@ -62,9 +62,32 @@ export function EmptyState({ title, hint, href, cta }: { title: string; hint?: s
 export function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="card p-4">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
+      <p className="mt-1 font-heading text-3xl font-medium text-ink">{value}</p>
     </div>
+  );
+}
+
+export function SectionTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-8">
+      <h2 className="section-title">{title}</h2>
+      {subtitle && <p className="section-subtitle">{subtitle}</p>}
+    </div>
+  );
+}
+
+/** Row of big numbers separated by thin dividers (home page stats card). */
+export function StatsBar({ items }: { items: { value: string | number; label: string }[] }) {
+  return (
+    <dl className="grid grid-cols-2 gap-y-6 rounded-sm bg-white px-4 py-8 shadow-lg md:grid-cols-4 md:gap-y-0">
+      {items.map((s) => (
+        <div key={s.label} className="text-center md:border-r md:border-gray-200 md:last:border-r-0">
+          <dd className="font-heading text-3xl font-normal text-ink">{s.value}</dd>
+          <dt className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{s.label}</dt>
+        </div>
+      ))}
+    </dl>
   );
 }
 

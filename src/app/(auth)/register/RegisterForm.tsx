@@ -41,7 +41,7 @@ export default function RegisterForm() {
           <label
             key={o.value}
             className={`cursor-pointer rounded-md border px-3 py-2 text-center text-sm font-semibold ${
-              role === o.value ? "border-brand bg-blue-50 text-brand" : "border-gray-300"
+              role === o.value ? "border-brand bg-brand-50 text-brand" : "border-gray-300"
             }`}
           >
             <input type="radio" name="role" value={o.value} checked={role === o.value} onChange={() => setRole(o.value)} className="sr-only" />

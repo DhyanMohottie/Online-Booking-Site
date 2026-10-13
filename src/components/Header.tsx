@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
+import Logo from "./Logo";
+import { HeaderFrame, NavLink } from "./HeaderFrame";
 
 const DASHBOARD: Record<string, { href: string; label: string }> = {
   CUSTOMER: { href: "/dashboard/customer", label: "My bookings" },
@@ -13,46 +14,40 @@ export default async function Header() {
   const dash = user ? DASHBOARD[user.role] : null;
 
   return (
-    <header className="bg-brand text-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Stay<span className="text-accent">Finder</span>
-        </Link>
-        <nav className="flex items-center gap-3 text-sm">
+    <HeaderFrame>
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4">
+        <Logo />
+        <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <NavLink href="/">Home</NavLink>
+          <NavLink href="/search">Hotels</NavLink>
           {user ? (
             <>
-              {dash && (
-                <Link href={dash.href} className="rounded-md px-3 py-1.5 font-medium hover:bg-white/10">
-                  {dash.label}
-                </Link>
-              )}
-              <span className="hidden text-white/80 sm:inline">{user.name}</span>
+              {dash && <NavLink href={dash.href}>{dash.label}</NavLink>}
+              <span className="hidden text-xs text-white/70 md:inline">{user.name}</span>
               <form
                 action={async () => {
                   "use server";
                   await signOut({ redirectTo: "/" });
                 }}
               >
-                <button className="rounded-md border border-white/60 px-3 py-1.5 font-medium hover:bg-white/10">
+                <button className="rounded-sm border border-white/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider hover:border-brand hover:text-brand">
                   Sign out
                 </button>
               </form>
             </>
           ) : (
             <>
-              <Link href="/register?role=OWNER" className="hidden rounded-md px-3 py-1.5 hover:bg-white/10 sm:inline">
+              <NavLink href="/register?role=OWNER" className="hidden sm:inline">
                 List your property
-              </Link>
-              <Link href="/register" className="rounded-md bg-white px-3 py-1.5 font-semibold text-brand hover:bg-gray-100">
+              </NavLink>
+              <NavLink href="/login">Login</NavLink>
+              <NavLink href="/register" className="rounded-sm bg-brand px-3 py-1.5 text-white! hover:text-white! hover:bg-brand-hover">
                 Register
-              </Link>
-              <Link href="/login" className="rounded-md border border-white/60 px-3 py-1.5 font-semibold hover:bg-white/10">
-                Sign in
-              </Link>
+              </NavLink>
             </>
           )}
         </nav>
       </div>
-    </header>
+    </HeaderFrame>
   );
 }

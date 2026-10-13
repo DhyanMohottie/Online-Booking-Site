@@ -56,7 +56,9 @@ export default async function HotelPage({ params, searchParams }: Props) {
               key={img.id}
               src={img.url}
               alt={`${hotel.name} photo ${i + 1}`}
-              className={`h-full w-full object-cover ${i === 0 ? "col-span-2 row-span-2" : ""}`}
+              className={`h-full w-full object-cover ${
+                i === 0 ? "col-span-2 row-span-2" : i === 3 && hotel.images.length === 4 ? "col-span-2" : ""
+              }`}
             />
           ))}
         </div>
@@ -72,7 +74,7 @@ export default async function HotelPage({ params, searchParams }: Props) {
           <div className="flex flex-wrap gap-1">
             {amenities.length ? (
               amenities.map((a) => (
-                <span key={a} className="badge bg-blue-50 text-brand">{a}</span>
+                <span key={a} className="badge bg-brand-50 text-brand">{a}</span>
               ))
             ) : (
               <span className="text-sm text-gray-500">None listed</span>

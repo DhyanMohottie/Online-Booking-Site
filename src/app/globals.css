@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7fa;
-  --foreground: #1a2433;
-  --brand: #003b95;
-  --brand-hover: #00306f;
-  --accent: #febb02;
+  --background: #f0f0f0;
+  --foreground: #222222;
+  --brand: #c8312b;
+  --brand-hover: #a82722;
+  --brand-50: #fbeceb;
+  --accent: #f5b301;
+  --ink: #1b2029;
 }
 
 @theme inline {
@@ -13,47 +15,89 @@
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
+  --color-brand-50: var(--brand-50);
   --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
+  --color-ink: var(--ink);
+  --font-sans: var(--font-opensans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-oswald), Impact, ui-sans-serif, sans-serif;
+}
+
+/* The mockup uses near-square corners; shrinking the scale restyles every rounded-* at once. */
+@theme {
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-size: 14px;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-oswald), Impact, ui-sans-serif, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    font-weight: 500;
+  }
+  /* Form controls keep native look/size unless a component class overrides it. */
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+  }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-brand bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-brand transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-red-600 bg-white px-3 py-1.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-red-700 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-50 disabled:opacity-50;
   }
   .input {
-    @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-blue-200;
+    @apply w-full rounded-sm border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20;
   }
   .label {
-    @apply mb-1 block text-sm font-medium text-gray-700;
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600;
   }
   .card {
-    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+    @apply rounded-sm bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)];
   }
   .badge {
     @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
   .table-wrap {
-    @apply overflow-x-auto rounded-xl border border-gray-200 bg-white;
+    @apply overflow-x-auto rounded-sm bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)];
   }
   .table-wrap table {
     @apply w-full text-left text-sm;
   }
   .table-wrap th {
-    @apply bg-gray-50 px-4 py-3 font-semibold text-gray-600;
+    @apply bg-gray-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-600;
   }
   .table-wrap td {
     @apply border-t border-gray-100 px-4 py-3 align-top;
+  }
+
+  /* Centred uppercase section heading with a muted subtitle (as in the mockup). */
+  .section-title {
+    @apply text-center text-2xl text-ink md:text-3xl;
+  }
+  .section-subtitle {
+    @apply mt-2 text-center text-xs text-gray-500;
+  }
+  /* Full-bleed band that escapes the page container. */
+  .bleed {
+    @apply relative left-1/2 w-screen -translate-x-1/2;
   }
 }

@@ -53,7 +53,7 @@ function RoomForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="card space-y-3 border-brand p-4">
+    <form onSubmit={onSubmit} className="card space-y-3 p-4 ring-1 ring-brand">
       <FormError message={error} />
       <div className="grid gap-3 sm:grid-cols-4">
         <div className="sm:col-span-2">
