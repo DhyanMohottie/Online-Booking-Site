@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 import { FormError } from "@/components/forms";
+import AuthField from "@/components/auth/AuthField";
 
 export default function LoginForm() {
   const params = useSearchParams();
@@ -32,19 +34,19 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="card space-y-4 p-6">
+    <form onSubmit={onSubmit} className="space-y-5">
       <FormError message={error} />
-      <div>
-        <label className="label" htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" required className="input" autoComplete="email" />
-      </div>
-      <div>
-        <label className="label" htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" required className="input" autoComplete="current-password" />
-      </div>
-      <button className="btn w-full" disabled={busy}>{busy ? "Signing in..." : "Sign in"}</button>
-      <p className="text-center text-sm text-gray-600">
-        New here? <Link href="/register" className="font-semibold text-brand">Create an account</Link>
+      <AuthField id="email" name="email" type="email" label="Email" icon={Mail} autoComplete="email" />
+      <AuthField id="password" name="password" type="password" label="Password" icon={Lock} autoComplete="current-password" />
+      <button type="submit" className="btn w-full py-3.5 text-sm shadow-md shadow-brand/25 hover:-translate-y-px hover:shadow-lg" disabled={busy}>
+        {busy ? "Signing in..." : "Sign in"}
+        {!busy && <ArrowRight size={16} aria-hidden="true" />}
+      </button>
+      <p className="text-center text-base text-gray-600">
+        New here?{" "}
+        <Link href="/register" className="font-semibold text-brand underline-offset-4 hover:underline">
+          Create an account
+        </Link>
       </p>
     </form>
   );

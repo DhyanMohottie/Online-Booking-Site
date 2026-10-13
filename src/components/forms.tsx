@@ -23,6 +23,9 @@ export function ActionButton({
   label,
   confirm,
   className = "btn-outline",
+  icon,
+  size = "sm",
+  fullWidth = false,
 }: {
   url: string;
   method?: string;
@@ -30,6 +33,11 @@ export function ActionButton({
   label: string;
   confirm?: string;
   className?: string;
+  /** Optional leading icon (rendered before the label). */
+  icon?: React.ReactNode;
+  /** "sm" keeps the compact table-row look; "md" is the roomier card-action size. */
+  size?: "sm" | "md";
+  fullWidth?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -50,9 +58,21 @@ export function ActionButton({
   }
 
   return (
-    <span className="inline-flex flex-col items-start gap-1">
-      <button type="button" onClick={run} disabled={busy} className={`${className} !px-3 !py-1.5`}>
-        {busy ? "..." : label}
+    <span className={`inline-flex flex-col items-start gap-1 ${fullWidth ? "w-full" : ""}`}>
+      <button
+        type="button"
+        onClick={run}
+        disabled={busy}
+        className={`${className} ${size === "sm" ? "px-3! py-1.5!" : "px-5 py-2.5 text-sm"} ${fullWidth ? "w-full" : ""}`}
+      >
+        {busy ? (
+          "..."
+        ) : (
+          <>
+            {icon}
+            {label}
+          </>
+        )}
       </button>
       {error && <span className="max-w-48 text-xs text-red-600">{error}</span>}
     </span>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import { formatPrice } from "@/lib/availability";
 
 export function Stars({ count }: { count: number }) {
@@ -59,11 +60,18 @@ export function EmptyState({ title, hint, href, cta }: { title: string; hint?: s
   );
 }
 
-export function StatCard({ label, value }: { label: string; value: string | number }) {
+export function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon?: LucideIcon }) {
   return (
-    <div className="card p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
-      <p className="mt-1 font-heading text-3xl font-medium text-ink">{value}</p>
+    <div className="card flex items-center gap-4 p-5">
+      {Icon && (
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand">
+          <Icon size={22} aria-hidden="true" />
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</p>
+        <p className="mt-1 font-heading text-3xl font-medium text-ink">{value}</p>
+      </div>
     </div>
   );
 }

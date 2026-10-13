@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { ArrowRight, Building2, Lock, Luggage, Mail, UserRound } from "lucide-react";
 import { api, FormError } from "@/components/forms";
+import AuthField from "@/components/auth/AuthField";
+
+const ROLES = [
+  { value: "CUSTOMER", label: "Book stays", hint: "Find and reserve hotels", icon: Luggage },
+  { value: "OWNER", label: "List my hotel", hint: "Manage rooms and bookings", icon: Building2 },
+];
 
 export default function RegisterForm() {
   const params = useSearchParams();
@@ -30,41 +37,53 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="card space-y-4 p-6">
+    <form onSubmit={onSubmit} className="space-y-5">
       <FormError message={error} />
-      <fieldset className="grid grid-cols-2 gap-2">
-        <legend className="label">I want to</legend>
-        {[
-          { value: "CUSTOMER", label: "Book stays" },
-          { value: "OWNER", label: "List my hotel" },
-        ].map((o) => (
-          <label
-            key={o.value}
-            className={`cursor-pointer rounded-md border px-3 py-2 text-center text-sm font-semibold ${
-              role === o.value ? "border-brand bg-brand-50 text-brand" : "border-gray-300"
-            }`}
-          >
-            <input type="radio" name="role" value={o.value} checked={role === o.value} onChange={() => setRole(o.value)} className="sr-only" />
-            {o.label}
-          </label>
-        ))}
+      <fieldset>
+        <legend className="mb-1.5 text-sm font-semibold text-ink">I want to</legend>
+        <div className="grid grid-cols-2 gap-3">
+          {ROLES.map(({ value, label, hint, icon: Icon }) => {
+            const selected = role === value;
+            return (
+              <label key={value} className="relative cursor-pointer">
+                <input type="radio" name="role" value={value} checked={selected} onChange={() => setRole(value)} className="peer sr-only" />
+                <span
+                  className={`flex h-full flex-col gap-1 rounded-xl border p-3.5 transition peer-focus-visible:ring-4 peer-focus-visible:ring-brand/20 ${
+                    selected ? "border-brand bg-brand-50" : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-full ${selected ? "bg-brand text-white" : "bg-gray-100 text-gray-500"}`}>
+                    <Icon size={18} aria-hidden="true" />
+                  </span>
+                  <span className={`font-semibold ${selected ? "text-brand" : "text-ink"}`}>{label}</span>
+                  <span className="text-sm text-gray-500">{hint}</span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
       </fieldset>
-      <div>
-        <label className="label" htmlFor="name">Full name</label>
-        <input id="name" name="name" required minLength={2} className="input" autoComplete="name" />
-      </div>
-      <div>
-        <label className="label" htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" required className="input" autoComplete="email" />
-      </div>
-      <div>
-        <label className="label" htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" required minLength={8} className="input" autoComplete="new-password" />
-        <p className="mt-1 text-xs text-gray-500">At least 8 characters.</p>
-      </div>
-      <button className="btn w-full" disabled={busy}>{busy ? "Creating account..." : "Create account"}</button>
-      <p className="text-center text-sm text-gray-600">
-        Already registered? <Link href="/login" className="font-semibold text-brand">Sign in</Link>
+      <AuthField id="name" name="name" label="Full name" icon={UserRound} autoComplete="name" minLength={2} />
+      <AuthField id="email" name="email" type="email" label="Email" icon={Mail} autoComplete="email" />
+      <AuthField
+        id="password"
+        name="password"
+        type="password"
+        label="Password"
+        icon={Lock}
+        autoComplete="new-password"
+        minLength={8}
+        hint="At least 8 characters."
+      />
+      <button type="submit" className="btn w-full py-3.5 text-sm shadow-md shadow-brand/25 hover:-translate-y-px hover:shadow-lg" disabled={busy}>
+        {busy ? "Creating account..." : "Create account"}
+        {!busy && <ArrowRight size={16} aria-hidden="true" />}
+      </button>
+      <p className="text-center text-base text-gray-600">
+        Already registered?{" "}
+        <Link href="/login" className="font-semibold text-brand underline-offset-4 hover:underline">
+          Sign in
+        </Link>
       </p>
     </form>
   );
