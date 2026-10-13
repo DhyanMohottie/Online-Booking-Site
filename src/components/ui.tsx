@@ -23,6 +23,38 @@ export function RatingBadge({ avg, count }: { avg: number | null; count: number 
   );
 }
 
+/** Verbal label for a 0-10 guest score. */
+export function scoreLabel(score: number): string {
+  if (score >= 9) return "Exceptional";
+  if (score >= 8) return "Excellent";
+  if (score >= 7) return "Very good";
+  if (score >= 6) return "Good";
+  return "Pleasant";
+}
+
+export function ScoreBadge({ score }: { score: number }) {
+  return (
+    <span className="flex h-11 min-w-11 items-center justify-center rounded-md rounded-bl-none bg-brand px-2 text-base font-bold text-white">
+      {score.toFixed(1)}
+    </span>
+  );
+}
+
+/** Section title with a round icon bubble and a muted subtitle (dashboard and hotel pages). */
+export function SectionHeading({ icon: Icon, title, subtitle }: { icon: LucideIcon; title: string; subtitle?: string }) {
+  return (
+    <div className="mb-5 flex items-center gap-4">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand">
+        <Icon size={20} aria-hidden="true" />
+      </span>
+      <div>
+        <h2 className="text-2xl text-ink">{title}</h2>
+        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+
 const STATUS_STYLES: Record<string, string> = {
   APPROVED: "bg-green-100 text-green-800",
   CONFIRMED: "bg-green-100 text-green-800",

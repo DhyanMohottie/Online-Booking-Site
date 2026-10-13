@@ -1,30 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BedDouble, CalendarCheck, CalendarDays, CalendarX, DoorOpen, Eye, MapPin, Settings2, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, BedDouble, CalendarCheck, CalendarDays, CalendarX, DoorOpen, Eye, MapPin, Settings2, X } from "lucide-react";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, nightsBetween, todayUTC } from "@/lib/availability";
 import { amenitiesFromString } from "@/lib/validators";
 import HotelForm from "@/components/HotelForm";
 import { ActionButton } from "@/components/forms";
-import { formatDate, HOTEL_STATUS, Stars } from "@/components/ui";
+import { formatDate, HOTEL_STATUS, SectionHeading as SectionHead, Stars } from "@/components/ui";
 import { getStage, STAGE } from "@/components/bookingStage";
 import RoomManager from "./RoomManager";
-
-function SectionHead({ icon: Icon, title, subtitle }: { icon: LucideIcon; title: string; subtitle: string }) {
-  return (
-    <div className="mb-5 flex items-center gap-4">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand">
-        <Icon size={20} aria-hidden="true" />
-      </span>
-      <div>
-        <h2 className="text-2xl text-ink">{title}</h2>
-        <p className="text-sm text-gray-500">{subtitle}</p>
-      </div>
-    </div>
-  );
-}
 
 const ROW_GRID = "md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.4fr)_7rem_13rem]";
 

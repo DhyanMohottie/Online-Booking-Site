@@ -3,24 +3,7 @@ import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 import type { HotelResult } from "@/lib/search";
 import { AMENITY_ICONS } from "./amenityIcons";
-import { Price, Stars } from "./ui";
-
-/** Verbal label for a 0-10 guest score. */
-function scoreLabel(score: number): string {
-  if (score >= 9) return "Exceptional";
-  if (score >= 8) return "Excellent";
-  if (score >= 7) return "Very good";
-  if (score >= 6) return "Good";
-  return "Pleasant";
-}
-
-function ScoreBadge({ score }: { score: number }) {
-  return (
-    <span className="flex h-11 min-w-11 items-center justify-center rounded-md rounded-bl-none bg-brand px-2 text-base font-bold text-white">
-      {score.toFixed(1)}
-    </span>
-  );
-}
+import { Price, ScoreBadge, scoreLabel, Stars } from "./ui";
 
 /** Amenity pills with icons: first `max`, then "+N more". */
 function AmenityChips({ amenities, max }: { amenities: string[]; max: number }) {
