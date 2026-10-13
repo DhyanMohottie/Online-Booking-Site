@@ -29,7 +29,7 @@ export default function ReviewForm({ bookingId }: { bookingId: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3 rounded-md bg-gray-50 p-4">
+    <form onSubmit={onSubmit} className="space-y-3 rounded-xl bg-gray-50 p-4">
       <FormError message={error} />
       <div>
         <label className="label" htmlFor={`rating-${bookingId}`}>Rating</label>

@@ -24,6 +24,11 @@ export default async function Header() {
           {user ? (
             <>
               {dash && <NavLink href={dash.href}>{dash.label}</NavLink>}
+              <span className="flex max-w-56 items-center gap-2 text-base font-semibold text-white md:text-lg" title={user.name ?? undefined}>
+                <UserRound size={22} className="shrink-0 text-brand" aria-hidden="true" />
+                <span className="truncate">{user.name}</span>
+              </span>
+              {/* The log-out power button is the right-most item of the nav. */}
               <form
                 className="group relative"
                 action={async () => {
@@ -37,19 +42,14 @@ export default async function Header() {
                 >
                   <Power size={20} aria-hidden="true" />
                 </button>
-                {/* Tooltip: shown on hover and keyboard focus. */}
+                {/* Tooltip: shown on hover and keyboard focus; right-aligned so it never leaves the viewport. */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute left-1/2 top-full z-40 mt-3 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-ink opacity-0 shadow-lg transition duration-150 before:absolute before:-top-1 before:left-1/2 before:h-2 before:w-2 before:-translate-x-1/2 before:rotate-45 before:bg-white group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100"
+                  className="pointer-events-none absolute right-0 top-full z-40 mt-3 translate-y-1 whitespace-nowrap rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-ink opacity-0 shadow-lg transition duration-150 before:absolute before:-top-1 before:right-4.5 before:h-2 before:w-2 before:rotate-45 before:bg-white group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100"
                 >
                   Log Out
                 </span>
               </form>
-              {/* Signed-in user's name sits at the far right of the nav. */}
-              <span className="flex max-w-56 items-center gap-2 text-base font-semibold text-white md:text-lg" title={user.name ?? undefined}>
-                <UserRound size={22} className="shrink-0 text-brand" aria-hidden="true" />
-                <span className="truncate">{user.name}</span>
-              </span>
             </>
           ) : (
             <>
