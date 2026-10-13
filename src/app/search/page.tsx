@@ -1,9 +1,9 @@
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import HotelCard from "@/components/HotelCard";
+import SearchFilters from "@/components/SearchFilters";
 import { EmptyState } from "@/components/ui";
 import { searchHotels, type SearchParams } from "@/lib/search";
-import { AMENITIES } from "@/lib/validators";
 import { toDayString } from "@/lib/availability";
 
 export const metadata = { title: "Search stays - StayFinder" };
@@ -24,7 +24,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const sp = normalize(await searchParams);
   const { items, total, page, pages, stay, guests } = await searchHotels(sp);
   const datesGiven = Boolean(sp.checkIn || sp.checkOut);
-  const selected = (sp.amenities ?? "").split(",").filter(Boolean);
 
   // Carry dates/guests into hotel pages so availability stays consistent.
   const stayQuery = stay
@@ -53,49 +52,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         </p>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-        <form className="card h-fit space-y-4 p-4" action="/search">
-          {(["destination", "checkIn", "checkOut", "guests"] as const).map((k) =>
-            sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null,
-          )}
-          <h2 className="font-bold">Filters</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="label" htmlFor="minPrice">Min $</label>
-              <input id="minPrice" name="minPrice" type="number" min={0} defaultValue={sp.minPrice} className="input" />
-            </div>
-            <div>
-              <label className="label" htmlFor="maxPrice">Max $</label>
-              <input id="maxPrice" name="maxPrice" type="number" min={0} defaultValue={sp.maxPrice} className="input" />
-            </div>
-          </div>
-          <div>
-            <label className="label" htmlFor="stars">Minimum stars</label>
-            <select id="stars" name="stars" defaultValue={sp.stars ?? ""} className="input">
-              <option value="">Any</option>
-              {[2, 3, 4, 5].map((s) => (
-                <option key={s} value={s}>{s}+ stars</option>
-              ))}
-            </select>
-          </div>
-          <fieldset>
-            <legend className="label">Amenities</legend>
-            <AmenityChecks selected={selected} />
-          </fieldset>
-          <div>
-            <label className="label" htmlFor="sort">Sort by</label>
-            <select id="sort" name="sort" defaultValue={sp.sort ?? ""} className="input">
-              <option value="">Top rated</option>
-              <option value="price_asc">Price: low to high</option>
-              <option value="price_desc">Price: high to low</option>
-              <option value="stars">Star rating</option>
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <button className="btn flex-1">Apply</button>
-            <Link href={`/search${sp.destination ? `?destination=${encodeURIComponent(sp.destination)}` : ""}`} className="btn-outline">Reset</Link>
-          </div>
-        </form>
+      <div className="grid gap-6 lg:grid-cols-[288px_1fr]">
+        <SearchFilters sp={sp} />
 
         <section className="space-y-4">
           <p className="text-sm text-gray-600">
@@ -116,20 +74,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           )}
         </section>
       </div>
-    </div>
-  );
-}
-
-function AmenityChecks({ selected }: { selected: string[] }) {
-  // Submitted as repeated `amenities` params; normalize() joins them server-side.
-  return (
-    <div className="space-y-1">
-      {AMENITIES.map((a) => (
-        <label key={a} className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="amenities" value={a} defaultChecked={selected.includes(a)} />
-          {a}
-        </label>
-      ))}
     </div>
   );
 }
