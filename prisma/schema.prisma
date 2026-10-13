@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Role: CUSTOMER | OWNER | ADMIN (validated with Zod; SQLite has no native enums)
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("CUSTOMER")
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  hotels       Hotel[]
+  bookings     Booking[]
+  reviews      Review[]
+}
+
+// Status: PENDING | APPROVED | REJECTED
+model Hotel {
+  id          String       @id @default(cuid())
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  description String
+  city        String
+  country     String
+  address     String
+  starRating  Int          @default(3)
+  amenities   String       @default("")
+  status      String       @default("PENDING")
+  createdAt   DateTime     @default(now())
+  images      HotelImage[]
+  roomTypes   RoomType[]
+  reviews     Review[]
+
+  @@index([city])
+  @@index([status])
+}
+
+model HotelImage {
+  id        String @id @default(cuid())
+  hotelId   String
+  hotel     Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int    @default(0)
+}
+
+// quantity = number of physical rooms of this type (inventory)
+model RoomType {
+  id            String    @id @default(cuid())
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  name          String
+  description   String    @default("")
+  capacity      Int       @default(2)
+  pricePerNight Int // cents
+  quantity      Int       @default(1)
+  amenities     String    @default("")
+  bookings      Booking[]
+}
+
+// Status: CONFIRMED | CANCELLED ; paymentStatus: MOCK_PAID | REFUNDED
+model Booking {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomTypeId    String
+  roomType      RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  checkIn       DateTime
+  checkOut      DateTime
+  guests        Int
+  totalPrice    Int // cents
+  status        String   @default("CONFIRMED")
+  paymentStatus String   @default("MOCK_PAID")
+  createdAt     DateTime @default(now())
+  review        Review?
+
+  @@index([roomTypeId, checkIn, checkOut])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hotelId   String
+  hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+}
