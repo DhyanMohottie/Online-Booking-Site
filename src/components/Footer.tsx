@@ -12,7 +12,7 @@ const LINKS = [
 export default function Footer() {
   return (
     <footer className="mt-10 bg-white">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[1.5fr_1fr]">
+      <div className="mx-auto grid max-w-page gap-8 px-4 py-10 sm:px-6 lg:px-10 md:grid-cols-[1.5fr_1fr]">
         <div className="space-y-3">
           <Logo dark />
           <p className="text-xs leading-relaxed text-gray-500">

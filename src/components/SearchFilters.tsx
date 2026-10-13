@@ -1,36 +1,9 @@
 import Link from "next/link";
-import {
-  Car,
-  ChevronDown,
-  Coffee,
-  Dumbbell,
-  PawPrint,
-  SlidersHorizontal,
-  Snowflake,
-  Sparkles,
-  Star,
-  Umbrella,
-  UtensilsCrossed,
-  WavesLadder,
-  Wifi,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown, SlidersHorizontal, Star } from "lucide-react";
 import type { SearchParams } from "@/lib/search";
 import { AMENITIES } from "@/lib/validators";
+import { AMENITY_ICONS } from "./amenityIcons";
 import FilterPanel from "./FilterPanel";
-
-const AMENITY_ICONS: Record<string, LucideIcon> = {
-  WiFi: Wifi,
-  Pool: WavesLadder,
-  Parking: Car,
-  Breakfast: Coffee,
-  Gym: Dumbbell,
-  Spa: Sparkles,
-  "Air conditioning": Snowflake,
-  "Pet friendly": PawPrint,
-  Restaurant: UtensilsCrossed,
-  "Beach access": Umbrella,
-};
 
 const STAR_OPTIONS = [
   { value: "", label: "Any" },

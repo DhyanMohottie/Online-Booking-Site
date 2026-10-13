@@ -39,9 +39,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-6">
-      <div className="bleed -mt-8 bg-ink py-8">
-        <div className="mx-auto max-w-6xl px-4">
-          <h1 className="mb-4 text-2xl text-white">Find your stay</h1>
+      <div className="bleed -mt-8 bg-ink py-10">
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
+          <h1 className="mb-5 text-3xl text-white">Find your stay</h1>
           <SearchBar destination={sp.destination} checkIn={sp.checkIn} checkOut={sp.checkOut} guests={sp.guests} />
         </div>
       </div>
@@ -52,11 +52,11 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         </p>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[288px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[288px_1fr] lg:gap-8">
         <SearchFilters sp={sp} />
 
-        <section className="space-y-4">
-          <p className="text-sm text-gray-600">
+        <section className="min-w-0 space-y-5">
+          <p className="text-base text-gray-600">
             {total} stay{total === 1 ? "" : "s"} found{sp.destination ? ` for "${sp.destination}"` : ""}
             {stay ? ` · ${toDayString(stay.checkIn)} to ${toDayString(stay.checkOut)}` : ""}
           </p>

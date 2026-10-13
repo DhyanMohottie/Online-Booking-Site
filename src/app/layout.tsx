@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${oswald.variable} ${openSans.variable} overflow-x-hidden font-sans antialiased`}>
         <Header />
-        <main className="mx-auto min-h-[70vh] max-w-6xl px-4 py-8">{children}</main>
+        <main className="mx-auto min-h-[70vh] max-w-page px-4 py-8 sm:px-6 lg:px-10">{children}</main>
         <Footer />
       </body>
     </html>

@@ -33,7 +33,7 @@ export default async function Home() {
           className="bg-cover bg-center"
           style={{ backgroundImage: `linear-gradient(rgba(10,14,22,0.55), rgba(10,14,22,0.55)), url(${HERO_IMAGE})` }}
         >
-          <div className="mx-auto max-w-4xl px-4 pb-28 pt-56 text-center md:pt-40 text-white">
+          <div className="mx-auto max-w-6xl px-4 pb-32 pt-56 text-center md:pt-40 text-white">
             <h1 className="text-3xl leading-tight md:text-5xl">
               Find unique places to stay
               <br />
@@ -47,7 +47,7 @@ export default async function Home() {
       </section>
 
       {/* Stats overlapping the hero */}
-      <div className="relative z-10 mx-auto -mt-14 max-w-4xl">
+      <div className="relative z-10 mx-auto -mt-14 max-w-6xl px-4">
         <StatsBar
           items={[
             { value: users.toLocaleString("en-US"), label: "Users" },
@@ -78,7 +78,7 @@ export default async function Home() {
 
       {/* Top hotels */}
       <section className="bleed bg-white py-16">
-        <div className="mx-auto max-w-6xl px-4">
+        <div className="mx-auto max-w-page px-4 sm:px-6 lg:px-10">
           <SectionTitle title="Top hotels maybe you will like" subtitle="Here are some hotels with great reputations." />
           <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
             {top.items.slice(0, 4).map((h) => (

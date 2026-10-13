@@ -16,7 +16,7 @@ export default async function Header() {
 
   return (
     <HeaderFrame>
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-5">
+      <div className="mx-auto flex max-w-page flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-5 sm:px-6 lg:px-10">
         <Logo />
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-3 md:gap-x-8">
           <NavLink href="/">Home</NavLink>

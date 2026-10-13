@@ -100,7 +100,7 @@ export default function RoomManager({ hotelId, rooms }: { hotelId: string; rooms
   const [editing, setEditing] = useState<string | null>(null); // room id, "new" or null
 
   return (
-    <div className="space-y-3">
+    <div className="max-w-4xl space-y-3">
       {rooms.length === 0 && editing !== "new" && (
         <p className="text-gray-500">No room types yet. Guests can book only after you add at least one.</p>
       )}

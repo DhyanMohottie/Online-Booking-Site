@@ -69,7 +69,7 @@ export default function HotelForm({ hotelId, initial = EMPTY }: { hotelId?: stri
   }
 
   return (
-    <form onSubmit={onSubmit} className="card space-y-4 p-6">
+    <form onSubmit={onSubmit} className="card max-w-4xl space-y-4 p-6">
       <FormError message={error} />
       {saved && <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">Saved.</p>}
       <div>
