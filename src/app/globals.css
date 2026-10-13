@@ -22,12 +22,13 @@
   --font-heading: var(--font-oswald), Impact, ui-sans-serif, sans-serif;
 }
 
-/* The mockup uses near-square corners; shrinking the scale restyles every rounded-* at once. */
+/* Rounded-rectangle scale used by every component (cards 14px, controls 10px). */
 @theme {
-  --radius-sm: 2px;
-  --radius-md: 2px;
-  --radius-lg: 3px;
-  --radius-xl: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
 
   /* Slightly larger type scale (Tailwind defaults are 12/14/16/18/20/24/30px). */
   --text-xs: 0.875rem;
@@ -71,28 +72,28 @@ body {
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-brand bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-brand transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-brand bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-brand transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-red-700 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-50 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-red-700 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-50 disabled:opacity-50;
   }
   .input {
-    @apply w-full rounded-sm border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20;
+    @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20;
   }
   .label {
     @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600;
   }
   .card {
-    @apply rounded-sm bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)];
+    @apply rounded-xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ring-black/5;
   }
   .badge {
     @apply inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
   .table-wrap {
-    @apply overflow-x-auto rounded-sm bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)];
+    @apply overflow-x-auto rounded-xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ring-black/5;
   }
   .table-wrap table {
     @apply w-full text-left text-sm;

@@ -47,7 +47,7 @@ export default function BookingForm({ roomTypeId, checkIn, checkOut, maxGuests, 
       </div>
       <fieldset className="space-y-3 rounded-md border border-dashed border-gray-300 p-4">
         <legend className="px-1 text-sm font-semibold">Payment (demo only)</legend>
-        <p className="rounded bg-yellow-50 px-3 py-2 text-xs text-yellow-800">
+        <p className="rounded-md bg-yellow-50 px-3 py-2 text-xs text-yellow-800">
           This is a simulation. No card is charged and card details are never stored.
         </p>
         <div>

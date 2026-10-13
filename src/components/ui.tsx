@@ -80,7 +80,7 @@ export function SectionTitle({ title, subtitle }: { title: string; subtitle?: st
 /** Row of big numbers separated by thin dividers (home page stats card). */
 export function StatsBar({ items }: { items: { value: string | number; label: string }[] }) {
   return (
-    <dl className="grid grid-cols-2 gap-y-6 rounded-sm bg-white px-4 py-8 shadow-lg md:grid-cols-4 md:gap-y-0">
+    <dl className="grid grid-cols-2 gap-y-6 rounded-xl bg-white px-4 py-8 shadow-[0_12px_36px_rgba(0,0,0,0.12)] ring-1 ring-black/5 md:grid-cols-4 md:gap-y-0">
       {items.map((s) => (
         <div key={s.label} className="text-center md:border-r md:border-gray-200 md:last:border-r-0">
           <dd className="font-heading text-3xl font-normal text-ink">{s.value}</dd>
