@@ -84,7 +84,7 @@ export function StatsBar({ items }: { items: { value: string | number; label: st
       {items.map((s) => (
         <div key={s.label} className="text-center md:border-r md:border-gray-200 md:last:border-r-0">
           <dd className="font-heading text-3xl font-normal text-ink">{s.value}</dd>
-          <dt className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">{s.label}</dt>
+          <dt className="mt-1 text-xs font-semibold uppercase tracking-widest text-gray-500">{s.label}</dt>
         </div>
       ))}
     </dl>

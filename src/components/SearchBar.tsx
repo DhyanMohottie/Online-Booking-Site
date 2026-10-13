@@ -4,7 +4,7 @@ import { toDayString, todayUTC } from "@/lib/availability";
 type Props = { destination?: string; checkIn?: string; checkOut?: string; guests?: string; hidden?: Record<string, string | undefined> };
 
 const FIELD = "flex flex-col justify-center border-gray-200 px-4 py-2 md:border-r";
-const LABEL = "text-[10px] font-bold uppercase tracking-wider text-brand";
+const LABEL = "text-xs font-bold uppercase tracking-wider text-brand";
 const CONTROL = "w-full bg-transparent text-sm font-semibold text-ink outline-none placeholder:font-normal placeholder:text-gray-400";
 
 /** Plain GET form so search state lives in the URL (shareable, server-rendered). */

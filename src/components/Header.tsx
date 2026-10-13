@@ -1,3 +1,4 @@
+import { UserRound } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import Logo from "./Logo";
 import { HeaderFrame, NavLink } from "./HeaderFrame";
@@ -23,7 +24,6 @@ export default async function Header() {
           {user ? (
             <>
               {dash && <NavLink href={dash.href}>{dash.label}</NavLink>}
-              <span className="hidden text-xs text-white/70 md:inline">{user.name}</span>
               <form
                 action={async () => {
                   "use server";
@@ -34,6 +34,11 @@ export default async function Header() {
                   Sign out
                 </button>
               </form>
+              {/* Signed-in user's name sits at the far right of the nav. */}
+              <span className="flex max-w-48 items-center gap-2 text-sm font-semibold text-white" title={user.name ?? undefined}>
+                <UserRound size={18} className="shrink-0 text-brand" aria-hidden="true" />
+                <span className="truncate">{user.name}</span>
+              </span>
             </>
           ) : (
             <>

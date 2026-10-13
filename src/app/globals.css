@@ -28,12 +28,24 @@
   --radius-md: 2px;
   --radius-lg: 3px;
   --radius-xl: 3px;
+
+  /* Slightly larger type scale (Tailwind defaults are 12/14/16/18/20/24/30px). */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-size: 14px;
+  font-size: 16px;
 }
 
 @layer base {
