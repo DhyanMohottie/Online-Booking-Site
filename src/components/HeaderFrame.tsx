@@ -25,7 +25,7 @@ export function NavLink({ href, children, className = "" }: { href: string; chil
   return (
     <Link
       href={href}
-      className={`text-xs font-semibold uppercase tracking-wider transition hover:text-brand ${active ? "text-brand" : "text-white"} ${className}`}
+      className={`text-base font-semibold uppercase md:text-lg tracking-wider transition hover:text-brand ${active ? "text-brand" : "text-white"} ${className}`}
     >
       {children}
     </Link>

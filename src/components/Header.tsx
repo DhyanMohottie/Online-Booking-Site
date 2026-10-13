@@ -16,9 +16,9 @@ export default async function Header() {
 
   return (
     <HeaderFrame>
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-5">
         <Logo />
-        <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <nav className="flex flex-wrap items-center gap-x-6 gap-y-3 md:gap-x-8">
           <NavLink href="/">Home</NavLink>
           <NavLink href="/search">Hotels</NavLink>
           {user ? (
@@ -30,13 +30,13 @@ export default async function Header() {
                   await signOut({ redirectTo: "/" });
                 }}
               >
-                <button className="rounded-sm border border-white/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider hover:border-brand hover:text-brand">
+                <button className="rounded-sm border border-white/60 px-4 py-2 text-base font-semibold uppercase tracking-wider hover:border-brand md:text-lg hover:text-brand">
                   Sign out
                 </button>
               </form>
               {/* Signed-in user's name sits at the far right of the nav. */}
-              <span className="flex max-w-48 items-center gap-2 text-sm font-semibold text-white" title={user.name ?? undefined}>
-                <UserRound size={18} className="shrink-0 text-brand" aria-hidden="true" />
+              <span className="flex max-w-56 items-center gap-2 text-base font-semibold text-white md:text-lg" title={user.name ?? undefined}>
+                <UserRound size={22} className="shrink-0 text-brand" aria-hidden="true" />
                 <span className="truncate">{user.name}</span>
               </span>
             </>
@@ -46,7 +46,7 @@ export default async function Header() {
                 List your property
               </NavLink>
               <NavLink href="/login">Login</NavLink>
-              <NavLink href="/register" className="rounded-sm bg-brand px-3 py-1.5 text-white! hover:text-white! hover:bg-brand-hover">
+              <NavLink href="/register" className="rounded-sm bg-brand px-4 py-2 text-white! hover:text-white! hover:bg-brand-hover">
                 Register
               </NavLink>
             </>

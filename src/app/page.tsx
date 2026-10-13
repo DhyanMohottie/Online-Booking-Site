@@ -33,7 +33,7 @@ export default async function Home() {
           className="bg-cover bg-center"
           style={{ backgroundImage: `linear-gradient(rgba(10,14,22,0.55), rgba(10,14,22,0.55)), url(${HERO_IMAGE})` }}
         >
-          <div className="mx-auto max-w-4xl px-4 pb-28 pt-40 text-center text-white">
+          <div className="mx-auto max-w-4xl px-4 pb-28 pt-56 text-center md:pt-40 text-white">
             <h1 className="text-3xl leading-tight md:text-5xl">
               Find unique places to stay
               <br />
