@@ -5,15 +5,9 @@ import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/availability";
 import { ActionButton } from "@/components/forms";
-import { EmptyState, StatCard, Stars } from "@/components/ui";
+import { EmptyState, HOTEL_STATUS, StatCard, Stars } from "@/components/ui";
 
 export const metadata = { title: "Manage hotels - StayFinder" };
-
-const STATUS: Record<string, { label: string; className: string; hint?: string }> = {
-  APPROVED: { label: "Approved", className: "bg-green-100 text-green-800" },
-  PENDING: { label: "Pending", className: "bg-amber-100 text-amber-800", hint: "Awaiting admin approval - not visible in search yet." },
-  REJECTED: { label: "Rejected", className: "bg-red-100 text-red-700", hint: "Rejected by an admin. Edit the hotel and save to resubmit." },
-};
 
 export default async function OwnerDashboard() {
   const user = await requireRole("OWNER");
@@ -63,7 +57,7 @@ export default async function OwnerDashboard() {
       ) : (
         <div className="space-y-5">
           {hotels.map((h) => {
-            const status = STATUS[h.status] ?? { label: h.status, className: "bg-gray-100 text-gray-700" };
+            const status = HOTEL_STATUS[h.status] ?? { label: h.status, className: "bg-gray-100 text-gray-700" };
             const image = h.images[0]?.url;
             const totalRooms = h.roomTypes.reduce((s, r) => s + r.quantity, 0);
 

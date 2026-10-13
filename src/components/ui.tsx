@@ -33,6 +33,13 @@ const STATUS_STYLES: Record<string, string> = {
   DISABLED: "bg-red-100 text-red-800",
 };
 
+/** Hotel approval status: pill label/colour and an optional one-line hint for the owner. */
+export const HOTEL_STATUS: Record<string, { label: string; className: string; hint?: string }> = {
+  APPROVED: { label: "Approved", className: "bg-green-100 text-green-800" },
+  PENDING: { label: "Pending", className: "bg-amber-100 text-amber-800", hint: "Awaiting admin approval - not visible in search yet." },
+  REJECTED: { label: "Rejected", className: "bg-red-100 text-red-700", hint: "Rejected by an admin. Edit the hotel and save to resubmit." },
+};
+
 export function StatusBadge({ status }: { status: string }) {
   return <span className={`badge ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-700"}`}>{status}</span>;
 }

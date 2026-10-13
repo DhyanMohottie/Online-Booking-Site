@@ -6,18 +6,10 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice, nightsBetween, todayUTC } from "@/lib/availability";
 import { ActionButton } from "@/components/forms";
 import { EmptyState, formatDate, Stars } from "@/components/ui";
+import { getStage, STAGE } from "@/components/bookingStage";
 import ReviewForm from "./ReviewForm";
 
 export const metadata = { title: "My bookings - StayFinder" };
-
-type Stage = "upcoming" | "inProgress" | "completed" | "cancelled";
-
-const STAGE: Record<Stage, { label: string; className: string }> = {
-  upcoming: { label: "Upcoming", className: "bg-green-100 text-green-800" },
-  inProgress: { label: "Staying now", className: "bg-amber-100 text-amber-800" },
-  completed: { label: "Completed", className: "bg-gray-100 text-gray-700" },
-  cancelled: { label: "Cancelled", className: "bg-red-100 text-red-700" },
-};
 
 export default async function CustomerDashboard() {
   const user = await requireRole("CUSTOMER");
@@ -53,7 +45,7 @@ export default async function CustomerDashboard() {
             const upcoming = b.status === "CONFIRMED" && b.checkIn > today;
             const completed = b.status === "CONFIRMED" && b.checkOut <= today;
             const inProgress = b.status === "CONFIRMED" && !upcoming && !completed;
-            const stage: Stage = b.status === "CANCELLED" ? "cancelled" : upcoming ? "upcoming" : completed ? "completed" : "inProgress";
+            const stage = getStage(b, today);
             const hotel = b.roomType.hotel;
             const image = hotel.images[0]?.url;
             const nights = nightsBetween(b.checkIn, b.checkOut);

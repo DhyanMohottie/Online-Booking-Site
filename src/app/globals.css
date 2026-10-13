@@ -86,6 +86,13 @@ body {
   .label {
     @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600;
   }
+  /* Soft modern form field + label (hotel/room forms); same recipe as the Filters panel. */
+  .field {
+    @apply w-full rounded-md border border-transparent bg-gray-50 px-3.5 py-3 text-base text-ink outline-none transition placeholder:text-gray-400 hover:bg-gray-100 focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-ink;
+  }
   .card {
     @apply rounded-xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ring-black/5;
   }
