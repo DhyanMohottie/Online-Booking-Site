@@ -40,9 +40,26 @@ model Hotel {
   images      HotelImage[]
   roomTypes   RoomType[]
   reviews     Review[]
+  attractions Attraction[]
 
   @@index([city])
   @@index([status])
+}
+
+// Optional tourist attractions near a hotel, added by its owner and shown on OpenStreetMap.
+// category: one of ATTRACTION_CATEGORIES (validated in src/lib/validators.ts)
+model Attraction {
+  id          String   @id @default(cuid())
+  hotelId     String
+  hotel       Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  name        String
+  category    String   @default("Other")
+  description String   @default("")
+  latitude    Float
+  longitude   Float
+  createdAt   DateTime @default(now())
+
+  @@index([hotelId])
 }
 
 model HotelImage {

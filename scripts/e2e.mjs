@@ -120,6 +120,50 @@ check("PUT can set the location again", r.status === 200, JSON.stringify(r));
 r = await owner2.json("PUT", `/api/hotels/${locId}`, { ...locBase, latitude: 1, longitude: 1 });
 check("another owner cannot change the location = 403", r.status === 403, r.status);
 
+// --- optional nearby attractions ---
+const place = { name: "Test Tower", category: "Landmark", description: "A tower for testing", latitude: 40.7589, longitude: -73.9851 };
+r = await owner.json("POST", `/api/hotels/${locId}/attractions`, place);
+check("owner adds a nearby attraction (201)", r.status === 201, JSON.stringify(r));
+const placeId = r.body.id;
+r = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, category: "Casino" });
+check("unknown category = 400", r.status === 400, JSON.stringify(r));
+r = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, latitude: "", longitude: "" });
+check("missing pin = 400 (never saved at 0,0)", r.status === 400 && /pin on the map/i.test(r.body.error), JSON.stringify(r));
+r = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, latitude: 120 });
+check("latitude out of range = 400", r.status === 400, JSON.stringify(r));
+r = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, description: "x".repeat(301) });
+check("over-long note = 400", r.status === 400, JSON.stringify(r));
+r = await owner2.json("POST", `/api/hotels/${locId}/attractions`, place);
+check("another owner cannot add attractions = 403", r.status === 403, r.status);
+r = await owner2.json("PUT", `/api/attractions/${placeId}`, { ...place, name: "Hijacked" });
+check("another owner cannot edit an attraction = 403", r.status === 403, r.status);
+r = await owner2.json("DELETE", `/api/attractions/${placeId}`);
+check("another owner cannot delete an attraction = 403", r.status === 403, r.status);
+r = await anon.json("POST", `/api/hotels/${locId}/attractions`, place);
+check("anonymous cannot add attractions = 401", r.status === 401, r.status);
+html = await (await anon.req(`/hotels/${locId}`)).text();
+const listed = { name: html.includes("Test Tower"), item: html.includes("nearby-item"), distance: /(\d+(\.\d)? km|\d+ m)(<!-- -->)? away/.test(html) };
+check("public page lists the attraction and its distance", listed.name && listed.item && listed.distance, JSON.stringify(listed));
+r = await owner.json("PUT", `/api/attractions/${placeId}`, { ...place, name: "Renamed Tower" });
+check("owner edits an attraction", r.status === 200, JSON.stringify(r));
+html = await (await anon.req(`/hotels/${locId}`)).text();
+check("public page shows the new name", html.includes("Renamed Tower") && !html.includes("Test Tower"));
+const xss = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, name: "<img src=x onerror=alert(1)>", description: "<script>alert(1)</script>" });
+html = await (await anon.req(`/hotels/${locId}`)).text();
+check("owner-entered HTML is escaped on the public page", xss.status === 201 && !html.includes("<img src=x") && !html.includes("<script>alert(1)</script>"), "unescaped");
+await owner.json("DELETE", `/api/attractions/${xss.body.id}`);
+let filled = 0;
+for (let i = 0; i < 12; i++) {
+  const rr = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, name: `Filler ${i}` });
+  if (rr.status === 201) filled++;
+}
+r = await owner.json("POST", `/api/hotels/${locId}/attractions`, { ...place, name: "One too many" });
+check("limit of 12 nearby places per hotel (the 13th is rejected)", filled === 11 && r.status === 400 && /up to 12/.test(r.body.error), `${filled} ${JSON.stringify(r)}`);
+r = await owner.json("DELETE", `/api/attractions/${placeId}`);
+check("owner deletes an attraction", r.status === 200, JSON.stringify(r));
+html = await (await anon.req(`/hotels/${locId}`)).text();
+check("deleted attraction disappears from the public page", !html.includes("Renamed Tower"));
+
 // --- booking & inventory ---
 r = await owner.json("POST", "/api/bookings", { roomTypeId: roomId, checkIn: ci, checkOut: co, guests: 2, cardNumber: "4242 4242 4242 4242" });
 check("owner cannot book (customers only) = 403", r.status === 403, r.status);

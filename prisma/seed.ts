@@ -26,6 +26,37 @@ const COORDS: Record<string, [number, number]> = {
   "Lagoon Palms Colombo": [6.9271, 79.8449],
 };
 
+// Optional nearby attractions for a few hotels (the rest intentionally have none).
+type PlaceSeed = { name: string; category: string; description: string; lat: number; lng: number };
+const ATTRACTIONS: Record<string, PlaceSeed[]> = {
+  "Grand Meridian Paris": [
+    { name: "Louvre Museum", category: "Museum", description: "Home of the Mona Lisa, a short walk away.", lat: 48.8611, lng: 2.3358 },
+    { name: "Tuileries Garden", category: "Park & nature", description: "Classic Parisian garden for a stroll.", lat: 48.8635, lng: 2.3275 },
+    { name: "Eiffel Tower", category: "Landmark", description: "About 15 minutes by metro.", lat: 48.8584, lng: 2.2945 },
+    { name: "Notre-Dame Cathedral", category: "Culture & temples", description: "Gothic masterpiece on the Ile de la Cite.", lat: 48.853, lng: 2.3499 },
+  ],
+  "Left Bank Boutique": [
+    { name: "Luxembourg Gardens", category: "Park & nature", description: "Relax by the fountains.", lat: 48.8462, lng: 2.3371 },
+    { name: "Pantheon", category: "Landmark", description: "Neoclassical mausoleum of famous French figures.", lat: 48.8462, lng: 2.3464 },
+  ],
+  "Shinjuku Skyline Hotel": [
+    { name: "Tokyo Metropolitan Government Building", category: "Viewpoint", description: "Free observation decks with skyline views.", lat: 35.6896, lng: 139.6917 },
+    { name: "Omoide Yokocho", category: "Food & drink", description: "Lantern-lit alley of tiny yakitori bars.", lat: 35.693, lng: 139.6989 },
+    { name: "Shinjuku Gyoen National Garden", category: "Park & nature", description: "Large garden, lovely in cherry blossom season.", lat: 35.6852, lng: 139.71 },
+    { name: "Meiji Shrine", category: "Culture & temples", description: "Peaceful forest shrine.", lat: 35.6764, lng: 139.6993 },
+  ],
+  "Manhattan Park Tower": [
+    { name: "Central Park", category: "Park & nature", description: "Right on the doorstep.", lat: 40.7829, lng: -73.9654 },
+    { name: "Carnegie Hall", category: "Culture & temples", description: "Legendary concert hall nearby.", lat: 40.7651, lng: -73.9799 },
+    { name: "Museum of Modern Art", category: "Museum", description: "World-class modern art collection.", lat: 40.7614, lng: -73.9776 },
+    { name: "Times Square", category: "Landmark", description: "Bright lights, a short walk south.", lat: 40.758, lng: -73.9855 },
+  ],
+  "Bondi Beachfront Resort": [
+    { name: "Bondi Beach", category: "Beach", description: "Iconic beach just across the road.", lat: -33.8915, lng: 151.2767 },
+    { name: "Bondi Icebergs Pool", category: "Food & drink", description: "Ocean pool with a famous club and restaurant.", lat: -33.8946, lng: 151.274 },
+  ],
+};
+
 type HotelSeed = {
   name: string;
   city: string;
@@ -209,6 +240,7 @@ async function main() {
   await prisma.review.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.roomType.deleteMany();
+  await prisma.attraction.deleteMany();
   await prisma.hotelImage.deleteMany();
   await prisma.hotel.deleteMany();
   await prisma.user.deleteMany();
@@ -255,6 +287,12 @@ async function main() {
       include: { roomTypes: true },
     });
     created.push({ id: hotel.id, rooms: hotel.roomTypes.map((r) => ({ id: r.id, price: r.pricePerNight })) });
+    const places = ATTRACTIONS[h.name] ?? [];
+    if (places.length) {
+      await prisma.attraction.createMany({
+        data: places.map((p) => ({ hotelId: hotel.id, name: p.name, category: p.category, description: p.description, latitude: p.lat, longitude: p.lng })),
+      });
+    }
   }
 
   // Bookings: past stays (reviewable), upcoming stays, and one cancelled.

@@ -26,7 +26,9 @@ import { auth } from "@/lib/auth";
 import { getHotelDetail, parseStay } from "@/lib/search";
 import { amenitiesFromString } from "@/lib/validators";
 import { calcTotal, formatPrice, nightsBetween, toDayString, todayUTC } from "@/lib/availability";
+import { distanceKm, formatDistance } from "@/lib/geo";
 import { AMENITY_ICONS } from "@/components/amenityIcons";
+import NearbyMap, { type NearbyPlace } from "@/components/NearbyMap";
 import { formatDate, ScoreBadge, scoreLabel, SectionHeading, Stars } from "@/components/ui";
 
 type Props = {
@@ -109,6 +111,18 @@ export default async function HotelPage({ params, searchParams }: Props) {
         }).toString()}`
       : null;
   const mapLink = mapEmbed ? `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}` : null;
+
+  // Optional nearby attractions (owner-entered); distances are straight-line from the hotel pin.
+  const hotelPin = latitude !== null && longitude !== null ? { latitude, longitude } : null;
+  const places: NearbyPlace[] = hotel.attractions.map((a) => ({
+    id: a.id,
+    name: a.name,
+    category: a.category,
+    description: a.description,
+    latitude: a.latitude,
+    longitude: a.longitude,
+    distance: hotelPin ? formatDistance(distanceKm(hotelPin, a)) : null,
+  }));
 
   return (
     <div className="space-y-8">
@@ -340,8 +354,21 @@ export default async function HotelPage({ params, searchParams }: Props) {
             )}
           </section>
 
-          {/* Location (only when the owner set one) */}
-          {mapEmbed && mapLink && (
+          {/* Location with nearby attractions: interactive map + numbered list */}
+          {places.length > 0 && (
+            <section id="location" className="scroll-mt-6">
+              <SectionHeading icon={MapPinned} title="Location & nearby attractions" subtitle={`${hotel.address}, ${hotel.city}, ${hotel.country}`} />
+              <NearbyMap hotelName={hotel.name} hotel={hotelPin} places={places} />
+              {mapLink && (
+                <a href={mapLink} target="_blank" rel="noopener noreferrer" className="btn-outline mt-4 h-11 w-fit gap-2 px-5 text-sm">
+                  Open the hotel in OpenStreetMap <ExternalLink size={15} aria-hidden="true" />
+                </a>
+              )}
+            </section>
+          )}
+
+          {/* Location only (no attractions): lightweight OpenStreetMap embed */}
+          {places.length === 0 && mapEmbed && mapLink && (
             <section id="location" className="scroll-mt-6">
               <SectionHeading icon={MapPinned} title="Location" subtitle={`${hotel.address}, ${hotel.city}, ${hotel.country}`} />
               <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ring-black/5">

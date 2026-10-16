@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hotelSchema } from "./validators";
+import { ATTRACTION_CATEGORIES, attractionSchema, hotelSchema } from "./validators";
 
 const base = {
   name: "Test Hotel",
@@ -44,5 +44,44 @@ describe("hotelSchema location", () => {
     expect(hotelSchema.safeParse({ ...base, latitude: 95, longitude: 2 }).success).toBe(false);
     expect(hotelSchema.safeParse({ ...base, latitude: 10, longitude: 181 }).success).toBe(false);
     expect(hotelSchema.safeParse({ ...base, latitude: "abc", longitude: 2 }).success).toBe(false);
+  });
+});
+
+const place = { name: "Eiffel Tower", category: "Landmark", description: "Iconic tower", latitude: 48.8584, longitude: 2.2945 };
+
+describe("attractionSchema", () => {
+  it("accepts a complete place and defaults the note to empty", () => {
+    expect(attractionSchema.safeParse(place).success).toBe(true);
+    const r = attractionSchema.safeParse({ ...place, description: undefined });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.description).toBe("");
+  });
+
+  it("coerces numeric strings and accepts every listed category", () => {
+    const r = attractionSchema.safeParse({ ...place, latitude: "48.8584", longitude: "2.2945" });
+    expect(r.success).toBe(true);
+    for (const c of ATTRACTION_CATEGORIES) expect(attractionSchema.safeParse({ ...place, category: c }).success).toBe(true);
+  });
+
+  it("rejects an unknown category, a short name and a long note", () => {
+    expect(attractionSchema.safeParse({ ...place, category: "Casino" }).success).toBe(false);
+    expect(attractionSchema.safeParse({ ...place, name: "A" }).success).toBe(false);
+    expect(attractionSchema.safeParse({ ...place, description: "x".repeat(301) }).success).toBe(false);
+  });
+
+  it("requires a pin: missing, empty or null coordinates are errors, never silently 0", () => {
+    for (const bad of [undefined, "", null]) {
+      const r = attractionSchema.safeParse({ ...place, latitude: bad });
+      expect(r.success).toBe(false);
+      if (!r.success) expect(r.error.issues[0].message).toMatch(/pin on the map/i);
+      expect(attractionSchema.safeParse({ ...place, longitude: bad }).success).toBe(false);
+    }
+  });
+
+  it("accepts a real zero coordinate and rejects out-of-range values", () => {
+    expect(attractionSchema.safeParse({ ...place, latitude: 0, longitude: 0 }).success).toBe(true);
+    expect(attractionSchema.safeParse({ ...place, latitude: 91 }).success).toBe(false);
+    expect(attractionSchema.safeParse({ ...place, longitude: -181 }).success).toBe(false);
+    expect(attractionSchema.safeParse({ ...place, latitude: "abc" }).success).toBe(false);
   });
 });

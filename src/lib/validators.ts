@@ -16,6 +16,24 @@ export const AMENITIES = [
   "Beach access",
 ] as const;
 
+/** Categories for nearby tourist attractions (icons/colours live in components/attractionIcons.ts). */
+export const ATTRACTION_CATEGORIES = [
+  "Landmark",
+  "Museum",
+  "Park & nature",
+  "Beach",
+  "Food & drink",
+  "Shopping",
+  "Culture & temples",
+  "Viewpoint",
+  "Nightlife",
+  "Other",
+] as const;
+export type AttractionCategory = (typeof ATTRACTION_CATEGORIES)[number];
+
+/** Maximum nearby places an owner can list per hotel. */
+export const MAX_ATTRACTIONS = 12;
+
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Name is too short").max(80),
   email: z.string().trim().toLowerCase().email("Enter a valid email"),
@@ -52,6 +70,24 @@ export const hotelSchema = z
     message: "Set both latitude and longitude, or leave the location empty",
     path: ["latitude"],
   });
+
+/** Required coordinate: "", null and undefined mean "no pin" (never silently 0). */
+const requiredCoordinate = (min: number, max: number, label: string) =>
+  z.preprocess(
+    (v) => (v === "" || v === null ? undefined : v),
+    z.coerce
+      .number({ message: "Place the pin on the map" })
+      .min(min, `${label} must be between ${min} and ${max}`)
+      .max(max, `${label} must be between ${min} and ${max}`),
+  );
+
+export const attractionSchema = z.object({
+  name: z.string().trim().min(2, "Give the place a name").max(100, "Name is too long"),
+  category: z.enum(ATTRACTION_CATEGORIES, { message: "Choose a category" }),
+  description: z.string().trim().max(300, "Keep the note under 300 characters").default(""),
+  latitude: requiredCoordinate(-90, 90, "Latitude"),
+  longitude: requiredCoordinate(-180, 180, "Longitude"),
+});
 
 export const roomTypeSchema = z.object({
   name: z.string().trim().min(2).max(100),

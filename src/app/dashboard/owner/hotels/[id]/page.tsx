@@ -1,16 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BedDouble, CalendarCheck, CalendarDays, CalendarX, DoorOpen, Eye, MapPin, MapPinned, Settings2, X } from "lucide-react";
+import { ArrowLeft, BedDouble, CalendarCheck, CalendarDays, CalendarX, Compass, DoorOpen, Eye, MapPin, MapPinned, Settings2, X } from "lucide-react";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, nightsBetween, todayUTC } from "@/lib/availability";
+import { distanceKm, formatDistance } from "@/lib/geo";
 import { amenitiesFromString } from "@/lib/validators";
+import type { NearbyPlace } from "@/components/NearbyMap";
 import HotelForm from "@/components/HotelForm";
 import { ActionButton } from "@/components/forms";
 import { formatDate, HOTEL_STATUS, SectionHeading as SectionHead, Stars } from "@/components/ui";
 import { getStage, STAGE } from "@/components/bookingStage";
 import RoomManager from "./RoomManager";
+import AttractionManager from "./AttractionManager";
 
 const ROW_GRID = "md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.4fr)_7rem_13rem]";
 
@@ -22,9 +25,22 @@ export default async function ManageHotelPage({ params }: { params: Promise<{ id
     include: {
       images: { orderBy: { sortOrder: "asc" } },
       roomTypes: { orderBy: { pricePerNight: "asc" } },
+      attractions: { orderBy: { createdAt: "asc" } },
     },
   });
   if (!hotel) notFound();
+
+  // Straight-line distance from the hotel pin (when it has one) to each nearby place.
+  const hotelPin = hotel.latitude !== null && hotel.longitude !== null ? { latitude: hotel.latitude, longitude: hotel.longitude } : null;
+  const places: NearbyPlace[] = hotel.attractions.map((a) => ({
+    id: a.id,
+    name: a.name,
+    category: a.category,
+    description: a.description,
+    latitude: a.latitude,
+    longitude: a.longitude,
+    distance: hotelPin ? formatDistance(distanceKm(hotelPin, a)) : null,
+  }));
 
   const bookings = await prisma.booking.findMany({
     where: { roomType: { hotelId: id } },
@@ -207,6 +223,23 @@ export default async function ManageHotelPage({ params }: { params: Promise<{ id
             amenities: amenitiesFromString(hotel.amenities),
             imageUrls: hotel.images.map((i) => i.url),
           }}
+        />
+      </section>
+
+      {/* Nearby attractions (optional) */}
+      <section id="attractions" className="scroll-mt-6">
+        <SectionHead
+          icon={Compass}
+          title="Nearby attractions"
+          subtitle="Optional. Add places guests may want to visit; they are shown on OpenStreetMap on your hotel page."
+        />
+        <AttractionManager
+          hotelId={hotel.id}
+          hotelName={hotel.name}
+          hotel={hotelPin}
+          city={hotel.city}
+          country={hotel.country}
+          places={places}
         />
       </section>
     </div>

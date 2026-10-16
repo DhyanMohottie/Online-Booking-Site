@@ -48,6 +48,17 @@ without one are unchanged.
 - **Updating an existing database:** after pulling this change run `npx prisma migrate dev` (it only adds the two
   nullable columns and keeps your data). `npm run db:seed` adds demo coordinates to the seeded hotels.
 
+### Nearby attractions (optional)
+
+Owners can also list up to 12 **tourist attractions near their hotel** (Hotel details page -> *Nearby attractions*):
+a name, a category (Landmark, Museum, Park & nature, Beach, Food & drink, ...), an optional short note and a pin on the
+OpenStreetMap map (click/drag the pin, or *Find place by name*). The owner sees all places on an overview map. On the
+public hotel page the hotel and its places appear on one OpenStreetMap map with a numbered list, straight-line
+distances from the hotel, and *Open in OpenStreetMap* links; hotels without places are unchanged.
+
+- Stored in a new `Attraction` table (`npx prisma migrate dev` creates it; no existing data is touched).
+- Owner-entered text is always rendered as plain text (never as HTML) in map popups and lists.
+
 ## How it works
 
 - **Inventory model:** a hotel has *room types*, each with a `quantity` of physical rooms.

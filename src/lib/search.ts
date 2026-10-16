@@ -133,6 +133,7 @@ export async function getHotelDetail(id: string, stay: DateRange | null) {
       images: { orderBy: { sortOrder: "asc" } },
       owner: { select: { name: true } },
       reviews: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "desc" } },
+      attractions: { orderBy: { createdAt: "asc" } },
       roomTypes: {
         include: {
           bookings: {
