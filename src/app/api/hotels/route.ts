@@ -12,6 +12,8 @@ export const POST = handle(async (req: Request) => {
   const hotel = await prisma.hotel.create({
     data: {
       ...data,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
       amenities: amenitiesToString(amenities),
       ownerId: user.id,
       status: "PENDING", // must be approved by an admin before it is public

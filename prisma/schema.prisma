@@ -32,6 +32,8 @@ model Hotel {
   country     String
   address     String
   starRating  Int          @default(3)
+  latitude    Float? // optional exact location (WGS84), set together with longitude
+  longitude   Float?
   amenities   String       @default("")
   status      String       @default("PENDING")
   createdAt   DateTime     @default(now())

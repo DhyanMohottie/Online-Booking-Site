@@ -34,6 +34,20 @@ npm run dev                   # http://localhost:3000
 5. After check-out, the customer can leave one review per stay; the hotel's rating updates.
    Seed data already contains past stays so reviews can be tried straight away (customer3 has one to review).
 
+## Hotel location (optional)
+
+Owners can optionally pin their hotel on an **OpenStreetMap** map (Hotel details -> *Map location*): click the map or
+drag the pin, type latitude/longitude, or press *Find from address*. *Open in OpenStreetMap* lets them verify the spot on
+openstreetmap.org. When a location is set, guests see a *Location* section with the map on the hotel page; hotels
+without one are unchanged.
+
+- Stored as two nullable columns (`Hotel.latitude`, `Hotel.longitude`); both or neither must be set.
+- The owner map uses [Leaflet](https://leafletjs.com) with OpenStreetMap tiles; *Find from address* calls the public
+  Nominatim geocoder from the browser - fine for demos and light use, see the
+  [usage policy](https://operations.osmfoundation.org/policies/nominatim/) before using it at scale.
+- **Updating an existing database:** after pulling this change run `npx prisma migrate dev` (it only adds the two
+  nullable columns and keeps your data). `npm run db:seed` adds demo coordinates to the seeded hotels.
+
 ## How it works
 
 - **Inventory model:** a hotel has *room types*, each with a `quantity` of physical rooms.

@@ -11,6 +11,21 @@ const day = (offset: number) => new Date(today.getTime() + offset * DAY);
 const img = (seed: string, n: number) =>
   Array.from({ length: n }, (_, i) => `https://picsum.photos/seed/${seed}-${i}/1000/700`);
 
+// Optional exact locations [lat, lng]; "Pending Demo Lodge" intentionally has none (the field is optional).
+const COORDS: Record<string, [number, number]> = {
+  "Grand Meridian Paris": [48.8606, 2.3376],
+  "Left Bank Boutique": [48.8534, 2.3339],
+  "Shinjuku Skyline Hotel": [35.6896, 139.6921],
+  "Asakusa Ryokan Sora": [35.7148, 139.7967],
+  "Bondi Beachfront Resort": [-33.8908, 151.2743],
+  "Harbour Bridge Inn": [-33.8587, 151.209],
+  "Casa del Sol Barcelona": [41.3917, 2.1649],
+  "Gothic Quarter Hostel & Suites": [41.3839, 2.1766],
+  "Manhattan Park Tower": [40.7656, -73.9818],
+  "Brooklyn Brownstone B&B": [40.6847, -73.9496],
+  "Lagoon Palms Colombo": [6.9271, 79.8449],
+};
+
 type HotelSeed = {
   name: string;
   city: string;
@@ -221,6 +236,8 @@ async function main() {
         country: h.country,
         address: h.address,
         starRating: h.stars,
+        latitude: COORDS[h.name]?.[0] ?? null,
+        longitude: COORDS[h.name]?.[1] ?? null,
         amenities: h.amenities.join(","),
         status: h.status ?? "APPROVED",
         images: { create: img(h.name.replace(/\W+/g, "-").toLowerCase(), 4).map((url, i) => ({ url, sortOrder: i })) },

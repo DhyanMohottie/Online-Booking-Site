@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BedDouble, CalendarCheck, CalendarDays, CalendarX, DoorOpen, Eye, MapPin, Settings2, X } from "lucide-react";
+import { ArrowLeft, BedDouble, CalendarCheck, CalendarDays, CalendarX, DoorOpen, Eye, MapPin, MapPinned, Settings2, X } from "lucide-react";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, nightsBetween, todayUTC } from "@/lib/availability";
@@ -80,6 +80,12 @@ export default async function ManageHotelPage({ params }: { params: Promise<{ id
                 <CalendarCheck size={15} className="text-gray-500" aria-hidden="true" />
                 {confirmed} booking{confirmed === 1 ? "" : "s"}
               </li>
+              {hotel.latitude !== null && hotel.longitude !== null && (
+                <li className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700">
+                  <MapPinned size={15} aria-hidden="true" />
+                  Map pin set
+                </li>
+              )}
             </ul>
             {status.hint && <p className="text-sm text-gray-500">{status.hint}</p>}
           </div>
@@ -196,6 +202,8 @@ export default async function ManageHotelPage({ params }: { params: Promise<{ id
             country: hotel.country,
             address: hotel.address,
             starRating: hotel.starRating,
+            latitude: hotel.latitude,
+            longitude: hotel.longitude,
             amenities: amenitiesFromString(hotel.amenities),
             imageUrls: hotel.images.map((i) => i.url),
           }}

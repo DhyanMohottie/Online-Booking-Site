@@ -18,6 +18,9 @@ export const PUT = handle(async (req: Request, { params }: Ctx) => {
       where: { id },
       data: {
         ...data,
+        // Explicit null so an owner can clear a previously saved location.
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
         amenities: amenitiesToString(amenities),
         // An owner's edit sends a previously rejected hotel back for review.
         ...(user.role === "OWNER" && hotel.status === "REJECTED" ? { status: "PENDING" } : {}),

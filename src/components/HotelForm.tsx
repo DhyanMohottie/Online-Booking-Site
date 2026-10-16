@@ -2,10 +2,11 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, ChevronDown, Save, Send } from "lucide-react";
 import { api, FormError } from "@/components/forms";
 import AmenityPicker from "@/components/AmenityPicker";
+import LocationPicker from "@/components/LocationPicker";
 
 export type HotelFormValues = {
   name: string;
@@ -14,6 +15,8 @@ export type HotelFormValues = {
   country: string;
   address: string;
   starRating: number;
+  latitude: number | null;
+  longitude: number | null;
   amenities: string[];
   imageUrls: string[];
 };
@@ -25,6 +28,8 @@ const EMPTY: HotelFormValues = {
   country: "",
   address: "",
   starRating: 3,
+  latitude: null,
+  longitude: null,
   amenities: [],
   imageUrls: [],
 };
@@ -46,6 +51,7 @@ export default function HotelForm({ hotelId, initial = EMPTY }: { hotelId?: stri
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
+  const topRef = useRef<HTMLDivElement>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -60,6 +66,9 @@ export default function HotelForm({ hotelId, initial = EMPTY }: { hotelId?: stri
       country: fd.get("country"),
       address: fd.get("address"),
       starRating: fd.get("starRating"),
+      // Optional location: empty strings mean "not set" (and clear a saved location).
+      latitude: fd.get("latitude"),
+      longitude: fd.get("longitude"),
       amenities: fd.getAll("amenities"),
       imageUrls: String(fd.get("imageUrls") ?? "")
         .split("\n")
@@ -77,6 +86,8 @@ export default function HotelForm({ hotelId, initial = EMPTY }: { hotelId?: stri
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save hotel");
+      // The form is long: make sure the message is visible.
+      requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
     } finally {
       setBusy(false);
     }
@@ -85,12 +96,14 @@ export default function HotelForm({ hotelId, initial = EMPTY }: { hotelId?: stri
   return (
     // @container: the two-column layout depends on the form's own width (wide manage page vs narrow register page).
     <form onSubmit={onSubmit} className="card @container space-y-6 p-6 sm:p-8">
-      <FormError message={error} />
-      {saved && (
-        <p role="status" className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3 text-green-700">
-          <Check size={18} aria-hidden="true" /> Saved.
-        </p>
-      )}
+      <div ref={topRef} className="space-y-6 empty:hidden">
+        <FormError message={error} />
+        {saved && (
+          <p role="status" className="flex items-center gap-2 rounded-xl bg-green-50 px-4 py-3 text-green-700">
+            <Check size={18} aria-hidden="true" /> Saved.
+          </p>
+        )}
+      </div>
 
       <div className="grid gap-8 @4xl:grid-cols-2 @4xl:gap-12">
         <div className="space-y-8">
@@ -162,6 +175,12 @@ export default function HotelForm({ hotelId, initial = EMPTY }: { hotelId?: stri
             </div>
           </Section>
         </div>
+      </div>
+
+      <div className="border-t border-gray-100 pt-8">
+        <Section title="Map location (optional)" hint="Show guests exactly where your hotel is on OpenStreetMap.">
+          <LocationPicker initialLat={initial.latitude} initialLng={initial.longitude} />
+        </Section>
       </div>
 
       <div className="border-t border-gray-100 pt-6">

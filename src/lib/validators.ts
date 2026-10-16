@@ -28,16 +28,30 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const hotelSchema = z.object({
-  name: z.string().trim().min(2).max(120),
-  description: z.string().trim().min(10, "Describe the hotel in at least 10 characters").max(4000),
-  city: z.string().trim().min(2).max(80),
-  country: z.string().trim().min(2).max(80),
-  address: z.string().trim().min(3).max(200),
-  starRating: z.coerce.number().int().min(1).max(5),
-  amenities: z.array(z.string()).default([]),
-  imageUrls: z.array(z.string().trim().url("Image must be a valid URL")).max(10).default([]),
-});
+/** Optional coordinate: "", null and undefined all mean "not set". */
+const optionalCoordinate = (min: number, max: number, label: string) =>
+  z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.coerce.number().min(min, `${label} must be between ${min} and ${max}`).max(max, `${label} must be between ${min} and ${max}`).optional(),
+  );
+
+export const hotelSchema = z
+  .object({
+    name: z.string().trim().min(2).max(120),
+    description: z.string().trim().min(10, "Describe the hotel in at least 10 characters").max(4000),
+    city: z.string().trim().min(2).max(80),
+    country: z.string().trim().min(2).max(80),
+    address: z.string().trim().min(3).max(200),
+    starRating: z.coerce.number().int().min(1).max(5),
+    latitude: optionalCoordinate(-90, 90, "Latitude"),
+    longitude: optionalCoordinate(-180, 180, "Longitude"),
+    amenities: z.array(z.string()).default([]),
+    imageUrls: z.array(z.string().trim().url("Image must be a valid URL")).max(10).default([]),
+  })
+  .refine((d) => (d.latitude === undefined) === (d.longitude === undefined), {
+    message: "Set both latitude and longitude, or leave the location empty",
+    path: ["latitude"],
+  });
 
 export const roomTypeSchema = z.object({
   name: z.string().trim().min(2).max(100),

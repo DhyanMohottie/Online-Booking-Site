@@ -9,10 +9,12 @@ import {
   CalendarDays,
   CalendarSearch,
   Check,
+  ExternalLink,
   Flame,
   ImageOff,
   Info,
   MapPin,
+  MapPinned,
   MessageSquareText,
   ShieldCheck,
   Sparkles,
@@ -95,6 +97,18 @@ export default async function HotelPage({ params, searchParams }: Props) {
   const stayQuery = stay
     ? `?checkIn=${toDayString(stay.checkIn)}&checkOut=${toDayString(stay.checkOut)}&guests=${guests}`
     : "";
+
+  // Optional owner-provided location: OpenStreetMap embed + link (no map library needed here).
+  const { latitude, longitude } = hotel;
+  const mapEmbed =
+    latitude !== null && longitude !== null
+      ? `https://www.openstreetmap.org/export/embed.html?${new URLSearchParams({
+          bbox: `${longitude - 0.006},${latitude - 0.0036},${longitude + 0.006},${latitude + 0.0036}`,
+          layer: "mapnik",
+          marker: `${latitude},${longitude}`,
+        }).toString()}`
+      : null;
+  const mapLink = mapEmbed ? `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}` : null;
 
   return (
     <div className="space-y-8">
@@ -325,6 +339,28 @@ export default async function HotelPage({ params, searchParams }: Props) {
               <p className="text-sm text-gray-500">Only customer accounts can make reservations.</p>
             )}
           </section>
+
+          {/* Location (only when the owner set one) */}
+          {mapEmbed && mapLink && (
+            <section id="location" className="scroll-mt-6">
+              <SectionHeading icon={MapPinned} title="Location" subtitle={`${hotel.address}, ${hotel.city}, ${hotel.country}`} />
+              <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ring-black/5">
+                <iframe
+                  title={`Map showing the location of ${hotel.name}`}
+                  src={mapEmbed}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  className="block h-80 w-full border-0 md:h-96"
+                />
+                <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <p className="text-sm text-gray-500">Map data &copy; OpenStreetMap contributors</p>
+                  <a href={mapLink} target="_blank" rel="noopener noreferrer" className="btn-outline h-11 gap-2 px-5 text-sm">
+                    Open in OpenStreetMap <ExternalLink size={15} aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Reviews */}
           <section>

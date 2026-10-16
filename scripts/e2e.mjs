@@ -99,6 +99,27 @@ check("admin approves hotel", r.status === 200, JSON.stringify(r));
 html = await (await anon.req(`/search?destination=Testville&checkIn=${ci}&checkOut=${co}&guests=2`)).text();
 check("approved hotel appears in search for free dates", html.includes(name));
 
+// --- optional map location ---
+const locBase = { name: `Loc Hotel ${Date.now()}`, description: "A hotel to test locations.", city: "Locville", country: "Nowhere", address: "1 Map St", starRating: 3, amenities: [], imageUrls: [] };
+r = await owner.json("POST", "/api/hotels", { ...locBase, latitude: 95, longitude: 10 });
+check("latitude out of range = 400", r.status === 400, JSON.stringify(r));
+r = await owner.json("POST", "/api/hotels", { ...locBase, latitude: 48.8, longitude: "" });
+check("only one coordinate = 400", r.status === 400 && /both latitude and longitude/i.test(r.body.error), JSON.stringify(r));
+r = await owner.json("POST", "/api/hotels", { ...locBase, latitude: "48.8606", longitude: "2.3376" });
+check("hotel with a location is created (201)", r.status === 201, JSON.stringify(r));
+const locId = r.body.id;
+await admin.json("PATCH", `/api/admin/hotels/${locId}`, { status: "APPROVED" });
+html = await (await anon.req(`/hotels/${locId}`)).text();
+check("public page embeds the OpenStreetMap map when a location is set", html.includes("openstreetmap.org/export/embed.html") && html.includes("marker=48.8606"), "no embed");
+r = await owner.json("PUT", `/api/hotels/${locId}`, { ...locBase, latitude: "", longitude: "" });
+check("PUT with empty coordinates clears the location", r.status === 200, JSON.stringify(r));
+html = await (await anon.req(`/hotels/${locId}`)).text();
+check("public page has no map once the location is cleared", !html.includes("openstreetmap.org/export/embed.html"));
+r = await owner.json("PUT", `/api/hotels/${locId}`, { ...locBase, latitude: 40.7656, longitude: -73.9818 });
+check("PUT can set the location again", r.status === 200, JSON.stringify(r));
+r = await owner2.json("PUT", `/api/hotels/${locId}`, { ...locBase, latitude: 1, longitude: 1 });
+check("another owner cannot change the location = 403", r.status === 403, r.status);
+
 // --- booking & inventory ---
 r = await owner.json("POST", "/api/bookings", { roomTypeId: roomId, checkIn: ci, checkOut: co, guests: 2, cardNumber: "4242 4242 4242 4242" });
 check("owner cannot book (customers only) = 403", r.status === 403, r.status);
