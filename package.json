@@ -9,6 +9,8 @@
         "lint": "eslint",
         "test": "vitest run",
         "test:e2e": "node scripts/e2e.mjs",
+        "test:routing": "node scripts/e2e-routing.mjs",
+        "mock:overpass": "node scripts/mock-overpass.mjs",
         "db:seed": "tsx prisma/seed.ts",
         "postinstall": "prisma generate"
     },

@@ -142,7 +142,7 @@ check("another owner cannot delete an attraction = 403", r.status === 403, r.sta
 r = await anon.json("POST", `/api/hotels/${locId}/attractions`, place);
 check("anonymous cannot add attractions = 401", r.status === 401, r.status);
 html = await (await anon.req(`/hotels/${locId}`)).text();
-const listed = { name: html.includes("Test Tower"), item: html.includes("nearby-item"), distance: /(\d+(\.\d)? km|\d+ m)(<!-- -->)? away/.test(html) };
+const listed = { name: html.includes("Test Tower"), item: html.includes("nearby-item"), distance: /(\d+(\.\d)? km|\d+ m)(<!-- -->)? straight line/.test(html) };
 check("public page lists the attraction and its distance", listed.name && listed.item && listed.distance, JSON.stringify(listed));
 r = await owner.json("PUT", `/api/attractions/${placeId}`, { ...place, name: "Renamed Tower" });
 check("owner edits an attraction", r.status === 200, JSON.stringify(r));

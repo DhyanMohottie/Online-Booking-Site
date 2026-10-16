@@ -59,6 +59,37 @@ distances from the hotel, and *Open in OpenStreetMap* links; hotels without plac
 - Stored in a new `Attraction` table (`npx prisma migrate dev` creates it; no existing data is touched).
 - Owner-entered text is always rendered as plain text (never as HTML) in map popups and lists.
 
+### Real road distances (A* and Dijkstra)
+
+Straight-line distance is only the fallback. When an owner saves a place (or presses *Calculate / Recalculate road
+distances*) the server computes the **real walking and driving distance** from the hotel pin to each place:
+
+1. It downloads the OpenStreetMap road network around the hotel and its places in one request to the
+   [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) (`src/lib/routing/overpass.ts`).
+2. It builds a weighted graph per travel mode (`graph.ts`, `profiles.ts`): walking uses footpaths, pedestrian streets
+   and ordinary roads (one-way rules ignored, motorways excluded); driving uses roads cars may use and respects one-way
+   streets, roundabouts and access tags. Edge weight = metres.
+3. The hotel and the place are **snapped onto the nearest road segment** (a virtual node is inserted, so distances are not
+   rounded to the nearest junction). The final figure is door to door: pin to road + route + road to pin.
+4. The shortest path is found with **both Dijkstra and A\*** (`dijkstra.ts`, `astar.ts`, own binary-heap priority queue).
+   A\* orders nodes by distance travelled + straight-line distance still to go, which never over-estimates, so it returns
+   the same optimal answer as Dijkstra while exploring far fewer roads. Both results and their explored-node counts
+   are stored, and owners can open *How it was calculated* on each place to compare them.
+5. Results are saved in `Attraction.routes` as JSON. **Guests never trigger routing**: the hotel page only reads the
+   stored routes, shows a *Walk / Drive* toggle, the road distance (walking also gives an approximate time at 5 km/h),
+   and draws the route as a dashed line when a place is chosen. Places without a route fall back to the straight line,
+   clearly labelled. Moving the hotel or a place pin clears the affected routes.
+
+Notes: the public Overpass servers are shared infrastructure - routing is owner-triggered, throttled (one run per hotel
+every few seconds) and limited to places within 8 km. Set `OVERPASS_URL` to use your own Overpass instance (or the mock
+below). Walking time is a simple average; there is no traffic model.
+
+```bash
+npm run mock:overpass      # offline Overpass look-alike serving a synthetic street grid (port 3199)
+OVERPASS_URL=http://127.0.0.1:3199/api/interpreter npm start -- -p 3100
+npm run test:routing       # then: 45 deterministic checks with known distances (one-way detours, footway shortcut, failures)
+```
+
 ## How it works
 
 - **Inventory model:** a hotel has *room types*, each with a `quantity` of physical rooms.
@@ -84,7 +115,9 @@ src/app/           pages (search, hotels/[id], book/*, dashboard/{customer,owner
 src/app/api/       route handlers (register, hotels, rooms, bookings, reviews, admin)
 src/lib/           availability, search, auth, authz, validators, prisma
 src/components/    Header, SearchBar, HotelCard, HotelForm, forms (client helpers), ui
+src/lib/routing/   road graph, Dijkstra, A*, Overpass client, route orchestration (unit-tested)
 scripts/e2e.mjs    API-level end-to-end walkthrough (needs a running server)
+scripts/e2e-routing.mjs, scripts/mock-overpass.mjs   road-distance integration test + offline Overpass mock
 ```
 
 ## Tests

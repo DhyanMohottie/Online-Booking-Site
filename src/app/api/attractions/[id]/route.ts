@@ -15,10 +15,15 @@ async function placeWithAccess(id: string) {
 
 export const PUT = handle(async (req: Request, { params }: Ctx) => {
   const { id } = await params;
-  await placeWithAccess(id);
+  const place = await placeWithAccess(id);
   const parsed = attractionSchema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
-  await prisma.attraction.update({ where: { id }, data: parsed.data });
+  const moved = parsed.data.latitude !== place.latitude || parsed.data.longitude !== place.longitude;
+  await prisma.attraction.update({
+    where: { id },
+    // A moved pin invalidates its saved road routes.
+    data: moved ? { ...parsed.data, routes: null, routesAt: null } : parsed.data,
+  });
   return NextResponse.json({ ok: true });
 });
 

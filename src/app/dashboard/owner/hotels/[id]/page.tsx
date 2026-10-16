@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, nightsBetween, todayUTC } from "@/lib/availability";
 import { distanceKm, formatDistance } from "@/lib/geo";
+import { routesView } from "@/lib/routing/view";
 import { amenitiesFromString } from "@/lib/validators";
 import type { NearbyPlace } from "@/components/NearbyMap";
 import HotelForm from "@/components/HotelForm";
@@ -40,6 +41,7 @@ export default async function ManageHotelPage({ params }: { params: Promise<{ id
     latitude: a.latitude,
     longitude: a.longitude,
     distance: hotelPin ? formatDistance(distanceKm(hotelPin, a)) : null,
+    routes: routesView(a.routes),
   }));
 
   const bookings = await prisma.booking.findMany({

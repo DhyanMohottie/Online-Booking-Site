@@ -57,6 +57,10 @@ model Attraction {
   description String   @default("")
   latitude    Float
   longitude   Float
+  // Road routes from the hotel (JSON: walking + driving results of A*/Dijkstra on OpenStreetMap roads).
+  // null = not calculated yet (or invalidated because the hotel/place moved); see src/lib/routing.
+  routes      String?
+  routesAt    DateTime?
   createdAt   DateTime @default(now())
 
   @@index([hotelId])

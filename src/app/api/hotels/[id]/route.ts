@@ -12,7 +12,11 @@ export const PUT = handle(async (req: Request, { params }: Ctx) => {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   const { imageUrls, amenities, ...data } = parsed.data;
 
+  const pinMoved = (data.latitude ?? null) !== hotel.latitude || (data.longitude ?? null) !== hotel.longitude;
+
   await prisma.$transaction([
+    // Saved road routes start at the hotel pin, so they are stale once it moves.
+    ...(pinMoved ? [prisma.attraction.updateMany({ where: { hotelId: id }, data: { routes: null, routesAt: null } })] : []),
     prisma.hotelImage.deleteMany({ where: { hotelId: id } }),
     prisma.hotel.update({
       where: { id },

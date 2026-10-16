@@ -3,7 +3,9 @@
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
-import { ExternalLink } from "lucide-react";
+import { Car, ExternalLink, Footprints } from "lucide-react";
+import type { Profile } from "@/lib/routing/types";
+import type { PlaceRoutesView } from "@/lib/routing/view";
 import { attractionStyle } from "./attractionIcons";
 
 type Leaflet = typeof import("leaflet");
@@ -17,6 +19,8 @@ export type NearbyPlace = {
   longitude: number;
   /** Pre-formatted straight-line distance from the hotel (null when the hotel has no pin). */
   distance: string | null;
+  /** Saved road routes (A* / Dijkstra on OpenStreetMap). Optional so the plain map works without them. */
+  routes?: PlaceRoutesView;
 };
 
 type Props = {
@@ -33,6 +37,9 @@ const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright" ta
 const HOTEL_PIN =
   '<svg width="36" height="46" viewBox="0 0 36 46" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))" aria-hidden="true"><path d="M18 0C8 0 0 8 0 18c0 13 18 28 18 28s18-15 18-28C36 8 28 0 18 0z" fill="#c8312b"/><circle cx="18" cy="18" r="7" fill="#fff"/></svg>';
 
+const MODE_LABEL: Record<Profile, string> = { walk: "Walk", drive: "Drive" };
+const ROUTE_COLOR = "#0a5bd8";
+
 const osmLink = (p: { latitude: number; longitude: number }) =>
   `https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=18/${p.latitude}/${p.longitude}`;
 
@@ -40,8 +47,19 @@ const osmLink = (p: { latitude: number; longitude: number }) =>
 const numberedIcon = (n: number, color: string) =>
   `<div style="width:30px;height:30px;border-radius:9999px;background:${color};color:#fff;font:700 14px/26px system-ui,sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)">${n}</div>`;
 
+/** The distance text for one place in one travel mode, falling back to the straight line. */
+function distanceText(p: NearbyPlace, mode: Profile): { main: string; straight: string | null; road: boolean } | null {
+  const route = p.routes?.[mode] ?? null;
+  if (route) {
+    const main = mode === "walk" ? `${route.distance}${route.duration ? ` · ~${route.duration} walk` : ""}` : `${route.distance} by car`;
+    return { main, straight: p.distance ? `${p.distance} straight line` : null, road: true };
+  }
+  if (p.distance) return { main: `${p.distance} straight line`, straight: null, road: false };
+  return null;
+}
+
 /** Popup content is built from text nodes so owner-entered text can never inject HTML. */
-function popupNode(p: NearbyPlace, index: number): HTMLElement {
+function popupNode(p: NearbyPlace, index: number, mode: Profile): HTMLElement {
   const box = document.createElement("div");
   box.style.minWidth = "170px";
   const title = document.createElement("strong");
@@ -49,7 +67,8 @@ function popupNode(p: NearbyPlace, index: number): HTMLElement {
   title.style.display = "block";
   box.appendChild(title);
   const meta = document.createElement("div");
-  meta.textContent = p.distance ? `${p.category} · ${p.distance} from the hotel` : p.category;
+  const dist = distanceText(p, mode);
+  meta.textContent = dist ? `${p.category} · ${dist.main}${dist.road ? "" : " from the hotel"}` : p.category;
   meta.style.color = "#555";
   box.appendChild(meta);
   if (p.description) {
@@ -75,7 +94,13 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
   const leafletRef = useRef<Leaflet | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
   const layerRef = useRef<ReturnType<Leaflet["layerGroup"]> | null>(null);
+  const routeLayerRef = useRef<ReturnType<Leaflet["layerGroup"]> | null>(null);
   const [ready, setReady] = useState(false);
+  const [mode, setMode] = useState<Profile>("walk");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const modeRef = useRef<Profile>(mode);
+  modeRef.current = mode;
+  const hasRoutes = places.some((p) => p.routes?.state === "ok");
 
   // Create the map once.
   useEffect(() => {
@@ -90,6 +115,7 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
       L.tileLayer(TILES, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
       map.on("focus", () => map.scrollWheelZoom.enable());
       map.on("blur", () => map.scrollWheelZoom.disable());
+      routeLayerRef.current = L.layerGroup().addTo(map);
       layerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
       setTimeout(() => map.invalidateSize(), 0);
@@ -100,6 +126,7 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
       mapRef.current?.remove();
       mapRef.current = null;
       layerRef.current = null;
+      routeLayerRef.current = null;
       markers.clear();
       setReady(false);
     };
@@ -113,6 +140,7 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
     if (!ready || !L || !map || !layer) return;
     layer.clearLayers();
     markersRef.current.clear();
+    setSelectedId(null);
     const points: [number, number][] = [];
 
     if (hotel) {
@@ -130,7 +158,8 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
         title: p.name,
         icon: L.divIcon({ className: "", html: numberedIcon(i + 1, attractionStyle(p.category).color), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -14] }),
       })
-        .bindPopup(popupNode(p, i))
+        .bindPopup(() => popupNode(p, i, modeRef.current))
+        .on("click", () => setSelectedId(p.id))
         .addTo(layer);
       markersRef.current.set(p.id, marker);
       points.push([p.latitude, p.longitude]);
@@ -140,11 +169,36 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
     else if (points.length > 1) map.fitBounds(points, { padding: [48, 48], maxZoom: 16 });
   }, [ready, hotel, hotelName, places]);
 
+  // Draw the chosen place's road route (dashed line) for the current travel mode and fit it in view.
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    const layer = routeLayerRef.current;
+    if (!ready || !L || !map || !layer) return;
+    layer.clearLayers();
+    if (!selectedId) return;
+    const index = places.findIndex((p) => p.id === selectedId);
+    const place = places[index];
+    if (!place) return;
+    const popup = markersRef.current.get(place.id)?.getPopup();
+    if (popup && popup.isOpen()) popup.setContent(popupNode(place, index, mode));
+    const route = place.routes?.[mode];
+    if (!route || route.path.length < 2) return;
+    L.polyline(route.path, { color: ROUTE_COLOR, weight: 5, opacity: 0.85, dashArray: "8 8", lineCap: "round" }).addTo(layer);
+    // Fit without animation, then re-open the popup so it pans fully into view after the new framing.
+    map.fitBounds(route.path, { padding: [56, 56], maxZoom: 17, animate: false });
+    const marker = markersRef.current.get(place.id);
+    if (marker?.isPopupOpen()) marker.openPopup();
+  }, [ready, selectedId, mode, places]);
+
   function focusPlace(id: string) {
     const marker = markersRef.current.get(id);
     const map = mapRef.current;
     if (!marker || !map) return;
-    map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 16), { duration: 0.6 });
+    setSelectedId(id);
+    const place = places.find((p) => p.id === id);
+    // With a saved route the route effect fits the whole route; otherwise zoom to the place.
+    if (!place?.routes?.[mode]) map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 16), { duration: 0.6 });
     marker.openPopup();
   }
 
@@ -175,13 +229,42 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
               <span className="inline-block h-3 w-3 rounded-full bg-brand" aria-hidden="true" /> Hotel
             </span>
           )}
-          <span>Distances are straight-line from the hotel.</span>
+          <span data-testid="nearby-note">
+            {hasRoutes
+              ? "Road distances follow OpenStreetMap roads and footpaths, found with the A* algorithm."
+              : "Distances are straight-line from the hotel."}
+          </span>
         </p>
+        {hasRoutes && (
+          <div role="group" aria-label="Travel mode" className="mb-3 inline-flex rounded-full bg-gray-100 p-1">
+            {(["walk", "drive"] as const).map((m) => {
+              const ModeIcon = m === "walk" ? Footprints : Car;
+              const on = mode === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  data-testid={`mode-${m}`}
+                  aria-pressed={on}
+                  onClick={() => setMode(m)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${on ? "bg-white text-brand shadow-sm ring-1 ring-black/5" : "text-gray-600 hover:text-ink"}`}
+                >
+                  <ModeIcon size={15} aria-hidden="true" /> {MODE_LABEL[m]}
+                </button>
+              );
+            })}
+          </div>
+        )}
         <ol className="max-h-[26rem] space-y-3 overflow-y-auto pr-1" aria-label="Nearby attractions">
           {places.map((p, i) => {
             const { icon: Icon, color } = attractionStyle(p.category);
+            const dist = distanceText(p, mode);
             return (
-              <li key={p.id} data-testid="nearby-item" className="rounded-xl bg-white p-3 shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ring-black/5">
+              <li
+                key={p.id}
+                data-testid="nearby-item"
+                className={`rounded-xl bg-white p-3 shadow-[0_2px_12px_rgba(0,0,0,0.05)] ring-1 ${selectedId === p.id ? "ring-2 ring-brand" : "ring-black/5"}`}
+              >
                 <button type="button" onClick={() => focusPlace(p.id)} className="flex w-full items-start gap-3 text-left" aria-label={`Show ${p.name} on the map`}>
                   <span
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
@@ -197,8 +280,16 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
                         <Icon size={14} aria-hidden="true" style={{ color }} />
                         {p.category}
                       </span>
-                      {p.distance && <span className="font-medium text-brand">{p.distance} away</span>}
+                      {dist && (
+                        <span data-testid="nearby-distance" data-road={dist.road ? "1" : "0"} className="font-medium text-brand">
+                          {dist.main}
+                        </span>
+                      )}
                     </span>
+                    {dist?.road && dist.straight && <span className="mt-1 block text-xs text-gray-500">{dist.straight}</span>}
+                    {hasRoutes && !dist?.road && p.routes && p.routes.state !== "none" && (
+                      <span className="mt-1 block text-xs text-gray-500">No {mode === "walk" ? "walking" : "driving"} route found.</span>
+                    )}
                     {p.description && <span className="mt-1.5 block text-sm text-gray-600">{p.description}</span>}
                   </span>
                 </button>

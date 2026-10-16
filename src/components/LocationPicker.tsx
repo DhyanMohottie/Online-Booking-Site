@@ -316,7 +316,7 @@ export default function LocationPicker({
             ? `Dark pin: ${referencePin.label}. Place the red pin on the attraction.`
             : away > 25
               ? `${formatDistance(away)} from ${referencePin.label} (straight line). That is quite far for a nearby place - is the pin right?`
-              : `${formatDistance(away)} from ${referencePin.label} (straight line).`}
+              : `${formatDistance(away)} from ${referencePin.label} (straight line). The road distance is calculated after you save.`}
         </p>
       )}
 

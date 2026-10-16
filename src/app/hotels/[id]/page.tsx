@@ -27,6 +27,7 @@ import { getHotelDetail, parseStay } from "@/lib/search";
 import { amenitiesFromString } from "@/lib/validators";
 import { calcTotal, formatPrice, nightsBetween, toDayString, todayUTC } from "@/lib/availability";
 import { distanceKm, formatDistance } from "@/lib/geo";
+import { routesView } from "@/lib/routing/view";
 import { AMENITY_ICONS } from "@/components/amenityIcons";
 import NearbyMap, { type NearbyPlace } from "@/components/NearbyMap";
 import { formatDate, ScoreBadge, scoreLabel, SectionHeading, Stars } from "@/components/ui";
@@ -112,7 +113,7 @@ export default async function HotelPage({ params, searchParams }: Props) {
       : null;
   const mapLink = mapEmbed ? `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}` : null;
 
-  // Optional nearby attractions (owner-entered); distances are straight-line from the hotel pin.
+  // Optional nearby attractions (owner-entered); saved road routes (when calculated) and straight-line distances from the hotel pin.
   const hotelPin = latitude !== null && longitude !== null ? { latitude, longitude } : null;
   const places: NearbyPlace[] = hotel.attractions.map((a) => ({
     id: a.id,
@@ -122,6 +123,7 @@ export default async function HotelPage({ params, searchParams }: Props) {
     latitude: a.latitude,
     longitude: a.longitude,
     distance: hotelPin ? formatDistance(distanceKm(hotelPin, a)) : null,
+    routes: routesView(a.routes),
   }));
 
   return (
