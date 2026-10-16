@@ -6,6 +6,7 @@ import type { Map as LeafletMap, Marker } from "leaflet";
 import { Car, ExternalLink, Footprints } from "lucide-react";
 import type { Profile } from "@/lib/routing/types";
 import type { PlaceRoutesView } from "@/lib/routing/view";
+import { osmPlaceLink, osmPlaceLinkLabel } from "@/lib/osmLinks";
 import { attractionStyle } from "./attractionIcons";
 
 type Leaflet = typeof import("leaflet");
@@ -22,6 +23,8 @@ export type NearbyPlace = {
   /** Saved road routes (A* / Dijkstra on OpenStreetMap). Optional so the plain map works without them. */
   routes?: PlaceRoutesView;
 };
+
+type Pin = { latitude: number; longitude: number };
 
 type Props = {
   hotelName: string;
@@ -40,9 +43,6 @@ const HOTEL_PIN =
 const MODE_LABEL: Record<Profile, string> = { walk: "Walk", drive: "Drive" };
 const ROUTE_COLOR = "#0a5bd8";
 
-const osmLink = (p: { latitude: number; longitude: number }) =>
-  `https://www.openstreetmap.org/?mlat=${p.latitude}&mlon=${p.longitude}#map=18/${p.latitude}/${p.longitude}`;
-
 /** Numbered round marker; only numbers and our own colour constants go into the HTML. */
 const numberedIcon = (n: number, color: string) =>
   `<div style="width:30px;height:30px;border-radius:9999px;background:${color};color:#fff;font:700 14px/26px system-ui,sans-serif;text-align:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)">${n}</div>`;
@@ -59,7 +59,7 @@ function distanceText(p: NearbyPlace, mode: Profile): { main: string; straight: 
 }
 
 /** Popup content is built from text nodes so owner-entered text can never inject HTML. */
-function popupNode(p: NearbyPlace, index: number, mode: Profile): HTMLElement {
+function popupNode(p: NearbyPlace, index: number, mode: Profile, hotel: Pin | null): HTMLElement {
   const box = document.createElement("div");
   box.style.minWidth = "170px";
   const title = document.createElement("strong");
@@ -78,10 +78,10 @@ function popupNode(p: NearbyPlace, index: number, mode: Profile): HTMLElement {
     box.appendChild(note);
   }
   const link = document.createElement("a");
-  link.href = osmLink(p);
+  link.href = osmPlaceLink(p, hotel, mode);
   link.target = "_blank";
   link.rel = "noopener noreferrer";
-  link.textContent = "Open in OpenStreetMap";
+  link.textContent = osmPlaceLinkLabel(hotel);
   link.style.display = "inline-block";
   link.style.marginTop = "6px";
   box.appendChild(link);
@@ -158,7 +158,7 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
         title: p.name,
         icon: L.divIcon({ className: "", html: numberedIcon(i + 1, attractionStyle(p.category).color), iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -14] }),
       })
-        .bindPopup(() => popupNode(p, i, modeRef.current))
+        .bindPopup(() => popupNode(p, i, modeRef.current, hotel))
         .on("click", () => setSelectedId(p.id))
         .addTo(layer);
       markersRef.current.set(p.id, marker);
@@ -181,7 +181,7 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
     const place = places[index];
     if (!place) return;
     const popup = markersRef.current.get(place.id)?.getPopup();
-    if (popup && popup.isOpen()) popup.setContent(popupNode(place, index, mode));
+    if (popup && popup.isOpen()) popup.setContent(popupNode(place, index, mode, hotel));
     const route = place.routes?.[mode];
     if (!route || route.path.length < 2) return;
     L.polyline(route.path, { color: ROUTE_COLOR, weight: 5, opacity: 0.85, dashArray: "8 8", lineCap: "round" }).addTo(layer);
@@ -189,7 +189,7 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
     map.fitBounds(route.path, { padding: [56, 56], maxZoom: 17, animate: false });
     const marker = markersRef.current.get(place.id);
     if (marker?.isPopupOpen()) marker.openPopup();
-  }, [ready, selectedId, mode, places]);
+  }, [ready, selectedId, mode, places, hotel]);
 
   function focusPlace(id: string) {
     const marker = markersRef.current.get(id);
@@ -294,12 +294,12 @@ export default function NearbyMap({ hotelName, hotel, places, showList = true, t
                   </span>
                 </button>
                 <a
-                  href={osmLink(p)}
+                  href={osmPlaceLink(p, hotel, mode)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 ml-11 inline-flex items-center gap-1.5 text-sm font-semibold text-brand underline-offset-4 hover:underline"
                 >
-                  Open in OpenStreetMap <ExternalLink size={13} aria-hidden="true" />
+                  {osmPlaceLinkLabel(hotel)} <ExternalLink size={13} aria-hidden="true" />
                 </a>
               </li>
             );

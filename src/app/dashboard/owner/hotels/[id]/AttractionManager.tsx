@@ -9,6 +9,7 @@ import NearbyMap, { type NearbyPlace } from "@/components/NearbyMap";
 import { attractionStyle } from "@/components/attractionIcons";
 import type { RouteFailure } from "@/lib/routing/types";
 import type { RouteView } from "@/lib/routing/view";
+import { osmPlaceLink, osmPlaceLinkLabel } from "@/lib/osmLinks";
 import { ATTRACTION_CATEGORIES, MAX_ATTRACTIONS } from "@/lib/validators";
 
 type HotelPin = { latitude: number; longitude: number } | null;
@@ -175,7 +176,7 @@ function AlgoLine({ label, route }: { label: string; route: RouteView }) {
   );
 }
 
-function PlaceCard({ place, onEdit }: { place: NearbyPlace; onEdit: () => void }) {
+function PlaceCard({ place, hotel, onEdit }: { place: NearbyPlace; hotel: HotelPin; onEdit: () => void }) {
   const { icon: Icon, color } = attractionStyle(place.category);
   const r = place.routes;
   return (
@@ -238,12 +239,12 @@ function PlaceCard({ place, onEdit }: { place: NearbyPlace; onEdit: () => void }
         </details>
       )}
       <a
-        href={`https://www.openstreetmap.org/?mlat=${place.latitude}&mlon=${place.longitude}#map=18/${place.latitude}/${place.longitude}`}
+        href={osmPlaceLink(place, hotel)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-brand underline-offset-4 hover:underline"
       >
-        Open in OpenStreetMap <ExternalLink size={14} aria-hidden="true" />
+        {osmPlaceLinkLabel(hotel)} <ExternalLink size={14} aria-hidden="true" />
       </a>
       <div className="mt-auto grid grid-cols-2 gap-3 border-t border-gray-100 pt-4">
         <button type="button" className="btn-outline h-11 w-full gap-2 px-4 text-sm" onClick={onEdit}>
@@ -378,7 +379,7 @@ export default function AttractionManager({
               <AttractionForm hotelId={hotelId} hotelName={hotelName} hotel={hotel} city={city} country={country} place={p} onSaved={(id) => calculate(id)} onDone={() => setEditing(null)} />
             </div>
           ) : (
-            <PlaceCard key={p.id} place={p} onEdit={() => setEditing(p.id)} />
+            <PlaceCard key={p.id} place={p} hotel={hotel} onEdit={() => setEditing(p.id)} />
           ),
         )}
         {editing === "new" ? (
