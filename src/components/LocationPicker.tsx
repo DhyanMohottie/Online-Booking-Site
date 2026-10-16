@@ -274,7 +274,7 @@ export default function LocationPicker({
             min={-90}
             max={90}
             inputMode="decimal"
-            placeholder="e.g. 48.8606"
+            placeholder="e.g. 7.2936"
             value={lat}
             onChange={(e) => setLat(e.target.value)}
             className="field"
@@ -290,7 +290,7 @@ export default function LocationPicker({
             min={-180}
             max={180}
             inputMode="decimal"
-            placeholder="e.g. 2.3376"
+            placeholder="e.g. 80.6413"
             value={lng}
             onChange={(e) => setLng(e.target.value)}
             className="field"
